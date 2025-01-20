@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Tạo sự kiện</title>
+</head>
+<body>
+    <header>
+        <h1>Tạo sự kiện</h1>
+        <nav>
+            <a href="index.html">Trang chính</a>
+            <a href="login.html">Đăng nhập</a>
+            <a href="register.html">Đăng ký</a>
+        </nav>
+    </header>
+    <main>
+        <form action="create_event.php" method="POST">
+            <label for="title">Tiêu đề sự kiện:</label>
+            <input type="text" id="title" name="title" required>
+            <label for="description">Mô tả:</label>
+            <textarea id="description" name="description" required></textarea>
+            <label for="target_amount">Mục tiêu quyên góp:</label>
+            <input type="number" id="target_amount" name="target_amount" required>
+            <button type="submit">Lưu sự kiện</button>
+        </form>
+    </main>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Đăng ký</title>
+</head>
+<body>
+    <header>
+        <h1>Đăng ký</h1>
+        <nav>
+            <a href="index.html">Trang chính</a>
+            <a href="login.html">Đăng nhập</a>
+        </nav>
+    </header>
+    <main>
+        <form action="register.php" method="POST">
+            <label for="username">Tên đăng nhập:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Mật khẩu:</label>
+            <input type="password" id="password" name="password" required>
+            <label for="account_number">Số tài khoản ngân hàng:</label>
+            <input type="text" id="account_number" name="account_number" required>
+            <button type="submit">Đăng ký</button>
+        </form>
+    </main>
+</body>
+</html>
