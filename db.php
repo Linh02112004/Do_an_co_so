@@ -1,7 +1,7 @@
 <?php
-$servername = "localhost"; // Thay đổi nếu cần
-$username = "root"; // Thay đổi nếu cần
-$password = ""; // Thay đổi nếu cần
+$servername = "localhost"; // Địa chỉ máy chủ MySQL
+$username = "root"; // Tên đăng nhập MySQL
+$password = ""; // Mật khẩu MySQL
 $dbname = "charity_events"; // Tên cơ sở dữ liệu
 
 // Kết nối

@@ -1,4 +1,33 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const arrow = document.getElementById('arrowDown');
+    const dropdown = document.getElementById('dropdown');
+    const userMenu = document.getElementById('userMenu');
+    const userNameElement = document.getElementById('userName');
+    const createEventLink = document.getElementById('createEventLink');
+    const loginLink = document.getElementById('loginLink');
+    const registerLink = document.getElementById('registerLink');
+
+    // Hiển thị thông tin người dùng nếu đã đăng nhập
+    if (sessionStorage.getItem('loggedIn')) {
+        const userName = "Người dùng"; // Thay bằng tên người dùng đã đăng nhập
+        userNameElement.innerText = userName;
+        userMenu.style.display = 'flex';
+        loginLink.style.display = 'none';
+        registerLink.style.display = 'none';
+        createEventLink.style.display = 'block';
+    }
+
+    arrow.addEventListener('click', (event) => {
+        event.stopPropagation(); // Ngăn chặn sự kiện click nổi lên
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Ẩn menu khi nhấn ra ngoài
+    document.addEventListener('click', () => {
+        dropdown.style.display = 'none';
+    });
+
+    // Lấy dữ liệu sự kiện từ server
     fetch('events.php')
         .then(response => response.json())
         .then(data => {
@@ -40,28 +69,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            const legend = document.getElementById('legend');
-            legend.innerHTML = `
-                <ul>
-                    <li><span style="color:#4CAF50;">&#9679;</span> Hoàn thành: ${completed}</li>
-                    <li><span style="color:#FFC107;">&#9679;</span> Chưa bắt đầu: ${notStarted}</li>
-                    <li><span style="color:#2196F3;">&#9679;</span> Đang diễn ra: ${ongoing}</li>
-                </ul>
-            `;
-
+            // Hiển thị danh sách sự kiện
             const eventsList = document.getElementById('eventsList');
             data.forEach(event => {
                 const div = document.createElement('div');
                 div.innerHTML = `<h3>${event.title}</h3><p>${event.description}</p>`;
                 eventsList.appendChild(div);
             });
-
-            // Hiển thị nút tạo sự kiện nếu người dùng đã đăng nhập
-            if (sessionStorage.getItem('loggedIn')) {
-                document.getElementById('createEventBtn').style.display = 'block';
-                document.getElementById('createEventBtn').onclick = () => {
-                    window.location.href = 'create_event.html';
-                };
-            }
         });
 });

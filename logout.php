@@ -1,6 +1,9 @@
 <?php
 session_start();
 session_destroy();
-header("Location: index.html");
+echo "<script>
+    sessionStorage.removeItem('loggedIn');
+    window.location.href = 'index.html';
+</script>";
 exit;
 ?>

@@ -15,10 +15,76 @@ header h1 {
     margin: 0;
 }
 
-nav a {
-    color: #ffffff;
-    margin: 0 10px;
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.home-link-container {
+    flex-grow: 1; /* Chiếm không gian còn lại */
+    display: flex;
+    justify-content: center; /* Căn giữa */
+}
+
+.home-link {
+    color: white; /* Đổi màu chữ thành trắng */
     text-decoration: none;
+    padding: 10px;
+}
+
+.home-link:hover {
+    text-decoration: underline; /* Thêm hiệu ứng khi di chuột */
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 10px; /* Khoảng cách giữa các nút */
+}
+
+.auth-buttons a {
+    background: #ffffff;
+    color: #35424a;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.auth-buttons a:hover {
+    background-color: #ddd;
+}
+
+#userMenu {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.arrow {
+    margin-left: 5px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+#userMenu:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
 }
 
 main {

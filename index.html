@@ -11,9 +11,25 @@
     <header>
         <h1>Quản lý sự kiện từ thiện</h1>
         <nav>
-            <a href="login.html">Đăng nhập</a>
-            <a href="register.html">Đăng ký</a>
-            <a href="logout.php">Đăng xuất</a>
+            <div class="home-link-container">
+                <a id="homeLink" href="index.html" class="home-link">Trang chính</a>
+            </div>
+            <div id="authLinks" style="margin-left: auto;">
+                <div class="auth-buttons">
+                    <a id="loginLink" href="login.html">Đăng nhập</a>
+                    <a id="registerLink" href="register.html">Đăng ký</a>
+                    <a id="createEventLink" href="create_event.html" style="display: none;">Tạo sự kiện</a>
+                </div>
+            </div>
+            <div id="userMenu" style="display: none;">
+                <span id="userName"></span>
+                <span id="arrowDown" class="arrow">▼</span>
+                <div id="dropdown" class="dropdown-content" style="display: none;">
+                    <a href="update_info.html">Cập nhật thông tin</a>
+                    <a href="change_password.html">Thay đổi mật khẩu</a>
+                    <a id="logoutLink" href="logout.php">Đăng xuất</a>
+                </div>
+            </div>
         </nav>
     </header>
     <main>
@@ -23,7 +39,6 @@
             <div id="legend"></div>
         </div>
         <div id="eventsList"></div>
-        <button id="createEventBtn" style="display: none;">Tạo sự kiện</button>
     </main>
     <script src="script.js"></script>
 </body>

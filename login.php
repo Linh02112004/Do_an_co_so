@@ -3,12 +3,12 @@ include 'db.php';
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
+    $username = $_POST['username']; // Số điện thoại hoặc CCCD
     $password = $_POST['password'];
 
-    $sql = "SELECT * FROM users WHERE username = ?";
+    $sql = "SELECT * FROM users WHERE phone = ? OR cccd = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $username);
+    $stmt->bind_param("ss", $username, $username);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "Mật khẩu không đúng.";
         }
     } else {
-        echo "Tên đăng nhập không tồn tại.";
+        echo "Số điện thoại hoặc CCCD không tồn tại.";
     }
 }
 ?>

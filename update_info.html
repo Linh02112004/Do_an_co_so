@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Cập nhật thông tin</title>
+</head>
+<body>
+    <header>
+        <h1>Cập nhật thông tin</h1>
+    </header>
+    <main>
+        <form action="update_info.php" method="POST">
+            <label for="full_name">Họ và tên:</label>
+            <input type="text" id="full_name" name="full_name" required>
+            <label for="dob">Ngày sinh:</label>
+            <input type="date" id="dob" name="dob" required>
+            <label for="cccd">Số CCCD:</label>
+            <input type="text" id="cccd" name="cccd" required>
+            <label for="address">Địa chỉ:</label>
+            <input type="text" id="address" name="address" required>
+            <label for="bank_account">Số tài khoản:</label>
+            <input type="text" id="bank_account" name="bank_account" required>
+            <label for="beneficiary_bank">Ngân hàng thụ hưởng:</label>
+            <input type="text" id="beneficiary_bank" name="beneficiary_bank" required>
+            <button type="submit">Cập nhật</button>
+        </form>
+    </main>
+</body>
+</html>
