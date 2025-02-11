@@ -23,6 +23,7 @@ CREATE TABLE events (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     description TEXT NOT NULL,
+    image_path VARCHAR(255) DEFAULT NULL,
     target_amount DECIMAL(10, 2) NOT NULL,
     raised_amount DECIMAL(10, 2) DEFAULT 0,
     created_by INT(11) NOT NULL,

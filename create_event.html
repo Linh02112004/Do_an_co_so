@@ -16,15 +16,38 @@
         </nav>
     </header>
     <main>
-        <form action="create_event.php" method="POST">
+        <form action="create_event.php" method="POST" enctype="multipart/form-data">
             <label for="title">Tiêu đề sự kiện:</label>
             <input type="text" id="title" name="title" required>
+            
             <label for="description">Mô tả:</label>
             <textarea id="description" name="description" required></textarea>
+            
             <label for="target_amount">Mục tiêu quyên góp:</label>
             <input type="number" id="target_amount" name="target_amount" required>
+            
+            <label for="event_image">Tải ảnh sự kiện:</label>
+            <input type="file" id="event_image" name="event_image" accept="image/*" onchange="previewImage(event)">
+            
+            <div id="image_preview" style="margin-top: 10px;"></div>
+            
             <button type="submit">Lưu sự kiện</button>
         </form>
+
+        <script>
+            function previewImage(event) {
+                var reader = new FileReader();
+                reader.onload = function(){
+                    var output = document.createElement('img');
+                    output.src = reader.result;
+                    output.style.maxWidth = '300px';
+                    output.style.marginTop = '10px';
+                    document.getElementById('image_preview').innerHTML = '';
+                    document.getElementById('image_preview').appendChild(output);
+                };
+                reader.readAsDataURL(event.target.files[0]);
+            }
+            </script>
     </main>
 </body>
 </html>
