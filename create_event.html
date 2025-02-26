@@ -24,28 +24,43 @@
             <textarea id="description" name="description" required></textarea>
             
             <label for="target_amount">Mục tiêu quyên góp:</label>
-            <input type="number" id="target_amount" name="target_amount" required>
+            <input type="number" id="target_amount" name="target_amount" required min="1">
             
             <label for="event_image">Tải ảnh sự kiện:</label>
             <input type="file" id="event_image" name="event_image" accept="image/*" onchange="previewImage(event)">
             
-            <div id="image_preview" style="margin-top: 10px;"></div>
-            
+            <div id="image_preview" style="max-width: 100%;
+                                            height: auto;
+                                            align-items: center;
+                                            justify-content: center;
+                                            border-radius: 5px;
+                                            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+                                            "></div>
+            <br>
             <button type="submit">Lưu sự kiện</button>
         </form>
 
         <script>
             function previewImage(event) {
-                var reader = new FileReader();
-                reader.onload = function(){
-                    var output = document.createElement('img');
-                    output.src = reader.result;
-                    output.style.maxWidth = '300px';
-                    output.style.marginTop = '10px';
-                    document.getElementById('image_preview').innerHTML = '';
-                    document.getElementById('image_preview').appendChild(output);
-                };
-                reader.readAsDataURL(event.target.files[0]);
+                const file = event.target.files[0];
+                if (file) {
+                    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                    if (!validTypes.includes(file.type)) {
+                        alert('Vui lòng chọn ảnh có định dạng JPEG, PNG hoặc GIF.');
+                        event.target.value = '';
+                        return;
+                    }
+                    var reader = new FileReader();
+                    reader.onload = function(){
+                        var output = document.createElement('img');
+                        output.src = reader.result;
+                        output.style.maxWidth = '300px';
+                        output.style.marginTop = '10px';
+                        document.getElementById('image_preview').innerHTML = '';
+                        document.getElementById('image_preview').appendChild(output);
+                    };
+                    reader.readAsDataURL(file);
+                }
             }
             </script>
     </main>
