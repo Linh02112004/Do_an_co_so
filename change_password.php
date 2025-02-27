@@ -23,7 +23,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
+        
+        // Kiểm tra mật khẩu hiện tại
         if (password_verify($current_password, $row['password'])) {
+            // Kiểm tra nếu mật khẩu mới giống mật khẩu hiện tại
+            if (password_verify($new_password, $row['password'])) {
+                echo "<script>alert('Mật khẩu mới không được trùng với mật khẩu hiện tại.'); window.history.back();</script>";
+                exit;
+            }
+
+            // Kiểm tra nếu mật khẩu mới khớp với xác nhận
             if ($new_password === $confirm_password) {
                 $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
                 $sql = "UPDATE users SET password=? WHERE id=?";
@@ -31,20 +40,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt->bind_param("si", $hashed_password, $user_id);
 
                 if ($stmt->execute()) {
-                    echo "Thay đổi mật khẩu thành công!";
-                    header("Location: index.html");
+                    echo "<script>alert('Thay đổi mật khẩu thành công!'); window.location.href = 'login.html';</script>";
                     exit;
                 } else {
-                    echo "Thay đổi mật khẩu thất bại: " . $conn->error;
+                    echo "<script>alert('Thay đổi mật khẩu thất bại!'); window.history.back();</script>";
                 }
             } else {
-                echo "Mật khẩu mới không khớp.";
+                echo "<script>alert('Mật khẩu mới không khớp.'); window.history.back();</script>";
             }
         } else {
-            echo "Mật khẩu hiện tại không đúng.";
+            echo "<script>alert('Mật khẩu hiện tại không đúng.'); window.history.back();</script>";
         }
     } else {
-        echo "Không tìm thấy người dùng.";
+        echo "<script>alert('Không tìm thấy người dùng.'); window.history.back();</script>";
     }
 }
 ?>

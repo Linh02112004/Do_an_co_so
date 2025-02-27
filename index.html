@@ -33,13 +33,22 @@
         </nav>
     </header>
     <main>
-        <h2>Số lượng sự kiện: <span id="eventCount">0</span></h2>
-        <div id="chartContainer">
-            <canvas id="eventChart"></canvas>
-            <div id="legend"></div>
+        <h2>Danh sách sự kiện</h2>
+    
+        <!-- Slideshow -->
+        <div class="slideshow-container">
+            <div id="slideshow"></div>
+            <button class="prev" onclick="changeSlide(-1)">❮</button>
+            <button class="next" onclick="changeSlide(1)">❯</button>
         </div>
+    
+        <!-- Biểu đồ -->
+        <h2>Thống kê sự kiện</h2>
+        <canvas id="eventChart"></canvas>
+    
+        <!-- Danh sách sự kiện -->
         <div id="eventsList"></div>
-    </main>
-    <script src="script.js"></script>
+    </main>    
+    <script src="script.js" defer></script>
 </body>
 </html>
