@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        echo "Email, CCCD hoặc số điện thoại đã được đăng ký.";
+        echo "<script>alert('Email, CCCD hoặc Số điện thoại đã được đăng ký." . $conn->error . "'); window.history.back();</script>";
     } else {
         // Thêm người dùng mới vào cơ sở dữ liệu
         $sql = "INSERT INTO users (full_name, address, email, cccd, phone, password) VALUES (?, ?, ?, ?, ?, ?)";
@@ -25,10 +25,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("ssssss", $full_name, $address, $email, $cccd, $phone, $password);
         
         if ($stmt->execute()) {
-            echo "Đăng ký thành công!";
-            header("Location: login.html");
+            echo "<script>alert('Đăng ký thành công!'); window.location.href='login.html';</script>";
         } else {
-            echo "Đăng ký thất bại: " . $conn->error;
+            echo "<script>alert('Đăng ký thất bại: " . $conn->error . "'); window.history.back();</script>";
         }
     }
 }

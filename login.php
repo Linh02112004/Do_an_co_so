@@ -22,10 +22,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 window.location.href = 'index.html';
             </script>";
         } else {
-            echo "Mật khẩu không đúng.";
+            echo "<script>alert('Mật khẩu không đúng." . $conn->error . "'); window.history.back();</script>";
         }
     } else {
-        echo "Số điện thoại hoặc CCCD không tồn tại.";
+        echo "<script>alert('Số điện thoại hoặc CCCD không tồn tại." . $conn->error . "'); window.history.back();</script>";
     }
 }
 ?>

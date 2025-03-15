@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <title>Quản lý sự kiện từ thiện</title>
 </head>
 <body>
@@ -33,22 +32,9 @@
         </nav>
     </header>
     <main>
-        <div>
-            <h3>Từ thiện.</h3>
-        </div>   
         <h2>Danh sách sự kiện</h2>
-    
-        <!-- Slideshow -->
-        <div class="slideshow-container">
-            <div id="slideshow"></div>
-            <button class="prev" onclick="changeSlide(-1)">❮</button>
-            <button class="next" onclick="changeSlide(1)">❯</button>
-        </div>
-    
-        <!-- Biểu đồ -->
-        <h2>Thống kê sự kiện</h2>
-        <canvas id="eventChart"></canvas>
-    </main>    
+        <div id="eventList" class="event-list"></div>
+    </main>
     <script src="script.js" defer></script>
 </body>
 </html>
