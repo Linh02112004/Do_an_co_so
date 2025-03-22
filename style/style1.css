@@ -1,81 +1,176 @@
-body {
-    font-family: Arial, sans-serif;
+* {
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #ffffff;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Header luôn cố định trên cùng */
 header {
-    background: #35424a;
-    color: #ffffff;
-    padding: 10px 20px;
-}
-
-header h1 {
-    margin: 0;
-}
-
-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-.home-link-container {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
+    padding: 15px 30px;
+    background-color: #f8fcfc;
+    border-bottom: 1px solid #ddd;
+    width: 100%;
+    position: relative;
 }
 
-.home-link {
-    color: white;
+/* Để tránh nội dung bị che mất do header cố định */
+header+main {
+    padding-top: 10px;
+}
+
+/* Tên website */
+header h1 {
+    font-size: 40px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-weight: bold;
+    color: #007bff;
+    margin: 0;
+}
+
+header h1 a {
     text-decoration: none;
-    padding: 10px;
+    color: inherit;
+    font-weight: inherit;
 }
 
-.home-link:hover {
-    text-decoration: underline;
+header h1 a:hover {
+    color: inherit;
 }
 
-
-.auth-buttons {
+/* Container bên phải */
+.header-right {
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+/* Hàng 1: Đăng nhập/Đăng ký */
+#authLinks {
+    margin-bottom: 5px;
 }
 
 .auth-buttons a {
-    background: white;
-    color: #2c3e50;
-    padding: 8px 15px;
-    border-radius: 5px;
     text-decoration: none;
-    font-weight: bold;
+    color: #333;
+    margin: 0 10px;
+    font-size: 16px;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 20px auto;
-    background: white;
+/* Hàng 2: home-link-container */
+.home-link-container {
+    display: flex;
+    gap: 15px;
+}
+
+.home-link-container a {
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.home-link-container a:hover {
+    color: #ff6600;
+}
+
+/* Main sẽ tự động chiếm phần còn lại của trang */
+main {
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background: white;
 }
 
-.section-title {
-    font-size: 22px;
-    font-weight: bold;
+h2 {
+    color: #007BFF;
     margin-bottom: 10px;
 }
 
-.button-primary {
-    background: #e74c3c;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-decoration: none;
+p,
+ul {
+    margin-bottom: 15px;
 }
 
-.button-primary:hover {
-    background: #c0392b;
+ul li {
+    list-style-type: square;
+    color: #FF9800;
+}
+
+/* Footer luôn cố định dưới cùng */
+footer {
+    background-color: #f8fcfc;
+    padding: 10px 0;
+    text-align: center;
+    width: 100%;
+    margin-top: auto;
+    /* Quan trọng: Đẩy footer xuống đáy */
+}
+
+.footer-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.footer-container h1 {
+    font-size: 24px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 10px;
+}
+
+.footer-links li {
+    display: inline;
+}
+
+.footer-links a {
+    text-decoration: none;
+    color: #555;
+    font-size: 14px;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+.footer-copyright {
+    font-size: 12px;
+    color: #777;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+    }
+
+    .home-link-container a,
+    .auth-buttons a {
+        display: block;
+        text-align: center;
+        margin: 5px 0;
+    }
 }

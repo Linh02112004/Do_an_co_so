@@ -1,38 +1,42 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style/style.css">
     <title>Quản lý sự kiện từ thiện</title>
 </head>
+
 <body>
     <header>
-        <h1>Quản lý sự kiện từ thiện</h1>
-        <nav>
-            <div class="home-link-container">
-                <a id="homeLink" href="index.html" class="home-link">Trang chính</a>
-            </div>
-            <div id="authLinks" style="margin-left: auto;">
-                <div class="auth-buttons">
-                    <a id="loginLink" href="login.html">Đăng nhập</a>
-                    <a id="registerLink" href="register.html">Đăng ký</a>
-                    <a id="createEventLink" href="create_event.html" style="display: none;">Tạo sự kiện</a>
-                </div>
-            </div>
+        <h1><a id="homeLink" href="index.html">IMPACT VN</a></h1>
+        <div class="header-right">
             <div id="userMenu" style="display: none;">
                 <span id="userName"></span>
                 <span id="arrowDown" class="arrow">▼</span>
                 <div id="dropdown" class="dropdown-content" style="display: none;">
                     <a href="update_info.php">Cập nhật thông tin</a>
+                    <a href="#">Quản lý sự kiện</a>
                     <a href="change_password.html">Thay đổi mật khẩu</a>
                     <a id="logoutLink" href="logout.php">Đăng xuất</a>
                 </div>
             </div>
-        </nav>
+
+            <div id="authLinks" style="margin-left: auto;">
+                <div class="auth-buttons">
+                    <a id="loginLink" href="login.html">Đăng nhập</a>
+                    <a id="registerLink" href="register.html">Đăng ký</a>
+                    <a id="createEventLink" href="create_event.html" style="display: none;">Tạo sự kiện</a>
+                    <a id="ongoingEvents" href="#">Hoạt động đang diễn ra</a>
+                    <a id="completedEvents" href="#">Hoạt động đã hoàn thành</a>
+                </div>
+            </div>
+
+        </div>
     </header>
     <main>
-        <div>
+        <div id="searchBoxContainer">
             <input type="text" id="searchBox" placeholder="Tìm kiếm sự kiện">
             <button id="searchButton">Tìm kiếm</button>
         </div>
@@ -41,6 +45,20 @@
 
         <h2>Hoạt động đã hoàn thành</h2>
     </main>
+
+    <footer>
+        <div class="footer-container">
+            <h1>IMPACT VN</h1>
+            <ul class="footer-links">
+                <li><a href="#">Điều khoản & Điều kiện</a></li>
+                <li><a href="#">Chính sách bảo mật</a></li>
+                <li><a href="#">Chính sách Cookie</a></li>
+            </ul>
+            <p class="footer-copyright">Copyright © 2025 Community Impact.</p>
+        </div>
+    </footer>
+
     <script src="script.js" defer></script>
 </body>
+
 </html>

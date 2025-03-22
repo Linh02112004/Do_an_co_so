@@ -264,7 +264,7 @@ function generateVietQR() {
     // Show the confirm button after 5 seconds
     setTimeout(() => {
         confirmBtn.style.display = 'inline-block';
-    }, 1000);
+    }, 5000);
 }
 
 </script>
