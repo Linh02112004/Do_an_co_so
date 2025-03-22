@@ -91,7 +91,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input type="text" id="bank_account" name="bank_account" value="<?= htmlspecialchars($user['bank_account'] ?? '') ?>" required>
         
             <label for="beneficiary_bank">Ngân hàng thụ hưởng:</label>
-            <input type="text" id="beneficiary_bank" name="beneficiary_bank" value="<?= htmlspecialchars($user['beneficiary_bank'] ?? '') ?>" required>
+            <select id="beneficiary_bank" name="beneficiary_bank" required>
+                <?php 
+                $bank_codes = [
+                    "BIDV" => "BIDV",
+                    "Vietcombank" => "VCB",
+                    "Techcombank" => "TCB",
+                    "Agribank" => "VBA",
+                    "ACB" => "ACB",
+                    "MB Bank" => "MB",
+                    "VPBank" => "VPB"
+                ];
+                $selected_bank = $user['beneficiary_bank'] ?? '';
+                foreach ($bank_codes as $name => $code): 
+                ?>
+                    <option value="<?= htmlspecialchars($name) ?>" <?= ($selected_bank == $name) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($name) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
             
             <button type="submit">Cập nhật</button>
         </form>

@@ -68,7 +68,7 @@ nav {
     display: none;
     position: absolute;
     background-color: #f9f9f9;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
 }
 
@@ -102,7 +102,9 @@ form label {
     margin: 10px 0 5px;
 }
 
-form input, form textarea {
+form input,
+form textarea,
+form select {
     padding: 10px;
     margin-bottom: 10px;
 }
@@ -164,7 +166,7 @@ button:hover {
 .progress-bar {
     width: 100%;
     height: 15px;
-    background-color: #f3f3f3; 
+    background-color: #f3f3f3;
     border-radius: 8px;
     margin-top: 5px;
     overflow: hidden;
@@ -172,6 +174,6 @@ button:hover {
 
 .progress-fill {
     height: 100%;
-    background-color: #35424a; 
+    background-color: #35424a;
     transition: width 0.5s ease-in-out;
 }
