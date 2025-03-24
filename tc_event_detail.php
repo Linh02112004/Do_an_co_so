@@ -83,7 +83,7 @@ $conn->close();
         </div>
         <button onclick="window.location.href='tc_index.php'">Quay lại</button>
         <?php if ($event["donation_count"] == 0): ?>
-            <button onclick="window.location.href='delete_event.php?id=<?php echo $event_id; ?>'">Xóa sự kiện</button>
+            <button onclick="window.location.href='tc_delete_event.php?id=<?php echo $event_id; ?>'">Xóa sự kiện</button>
         <?php endif; ?>
         <button onclick="window.location.href='tc_request_edit.php?id=<?php echo $event_id; ?>'">Yêu cầu sửa sự kiện</button>
     </div>

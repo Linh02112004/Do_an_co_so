@@ -40,11 +40,15 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chi tiết Sự kiện</title>
-    <link rel="stylesheet" href="ad_styles.css">
+    <link rel="stylesheet" href="tc_styles.css">
     <script>
         function toggleDonations() {
             var list = document.getElementById("donationList");
-            list.style.display = (list.style.display === "none") ? "block" : "none";
+            if (list.style.display === "none") {
+                list.style.display = "block";
+            } else {
+                list.style.display = "none";
+            }
         }
     </script>
 </head>
@@ -59,6 +63,8 @@ $conn->close();
         <p><strong>Địa chỉ hỗ trợ:</strong> <?php echo htmlspecialchars($event["location"]); ?></p>
         <p><strong>Mục tiêu quyên góp:</strong> <?php echo number_format($event["goal"])." VND"; ?></p>
         <p><strong>Số tiền đã quyên góp:</strong> <?php echo number_format($event["total_donated"])." VND"; ?></p>
+        
+        <!-- Nút danh sách quyên góp -->
         <button onclick="toggleDonations()">Danh sách quyên góp</button>
         <div id="donationList" style="display: none;">
             <h3>Danh sách quyên góp</h3>
@@ -77,11 +83,9 @@ $conn->close();
                 <?php endforeach; ?>
             </table>
         </div>
-        <button onclick="window.location.href='ad_index.php'">Quay lại</button>
-        <?php if ($event["donation_count"] == 0): ?>
-            <button onclick="window.location.href='ad_delete_event.php?id=<?php echo $event_id; ?>'">Xóa sự kiện</button>
-        <?php endif; ?>
-        <button onclick="window.location.href='ad_compare.php?id=<?php echo $event_id; ?>'">So sánh thay đổi</button>
+
+        <!-- Nút quay lại -->
+        <button onclick="window.location.href='ntg_index.php'">Quay lại</button>
     </div>
 </body>
 </html>

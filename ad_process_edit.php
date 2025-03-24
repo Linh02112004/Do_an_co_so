@@ -2,7 +2,6 @@
 session_start();
 require 'db_connect.php';
 
-// Kiểm tra nếu admin đã đăng nhập
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     header("Location: ad_login.php");
     exit();
@@ -80,3 +79,4 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['event_id'], $_POST['a
 } else {
     die("Yêu cầu không hợp lệ.");
 }
+?>

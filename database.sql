@@ -64,6 +64,16 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 ALTER TABLE notifications ADD COLUMN seen TINYINT(1) DEFAULT 0;
 
+CREATE TABLE participants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL, -- Mật khẩu sẽ được mã hóa
+    phone VARCHAR(20) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Tạo một tài khoản tổ chức mẫu (Mật khẩu là "password" nhưng cần mã hóa khi dùng thực tế)
 -- INSERT INTO users (name, email, password) 
 -- VALUES ('Tổ chức ABC', 'abc@example.com', 'password123');

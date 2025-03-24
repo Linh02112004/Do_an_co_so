@@ -83,16 +83,16 @@ $conn->close();
                         <p><strong>Tổ chức:</strong> <?php echo htmlspecialchars($event['organization']); ?></p>
                         <p><strong>Người phụ trách:</strong> <?php echo htmlspecialchars($event['organizer_name']); ?></p>
                         <?php
-$goal = $event['goal'];
-$raised = $event['amount_raised'];
-$progress = ($goal > 0) ? min(100, ($raised / $goal) * 100) : 0;
-?>
-<!-- Thanh tiến độ -->
-<div class="progress-bar-container">
-    <div class="progress-bar" style="width: <?php echo $progress; ?>%;">
-        <?php echo number_format($raised, 0, ',', '.'); ?> / <?php echo number_format($goal, 0, ',', '.'); ?> VNĐ
-    </div>
-</div>
+                        $goal = $event['goal'];
+                        $raised = $event['amount_raised'];
+                        $progress = ($goal > 0) ? min(100, ($raised / $goal) * 100) : 0;
+                        ?>
+                        <!-- Thanh tiến độ -->
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: <?php echo $progress; ?>%;">
+                                <?php echo number_format($raised, 0, ',', '.'); ?> / <?php echo number_format($goal, 0, ',', '.'); ?> VNĐ
+                            </div>
+                        </div>
                         <button onclick="window.location.href='tc_event_detail.php?id=<?php echo $event['id']; ?>'">Xem</button>
                     </div>
                 <?php endif; ?>
@@ -108,16 +108,16 @@ $progress = ($goal > 0) ? min(100, ($raised / $goal) * 100) : 0;
                         <p><strong>Tổ chức:</strong> <?php echo htmlspecialchars($event['organization']); ?></p>
                         <p><strong>Người phụ trách:</strong> <?php echo htmlspecialchars($event['organizer_name']); ?></p>
                         <?php
-$goal = $event['goal'];
-$raised = $event['amount_raised'];
-$progress = ($goal > 0) ? min(100, ($raised / $goal) * 100) : 0;
-?>
-<!-- Thanh tiến độ -->
-<div class="progress-bar-container">
-    <div class="progress-bar" style="width: <?php echo $progress; ?>%;">
-        <?php echo number_format($raised, 0, ',', '.'); ?> / <?php echo number_format($goal, 0, ',', '.'); ?> VNĐ
-    </div>
-</div>
+                        $goal = $event['goal'];
+                        $raised = $event['amount_raised'];
+                        $progress = ($goal > 0) ? min(100, ($raised / $goal) * 100) : 0;
+                        ?>
+                        <!-- Thanh tiến độ -->
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: <?php echo $progress; ?>%;">
+                                <?php echo number_format($raised, 0, ',', '.'); ?> / <?php echo number_format($goal, 0, ',', '.'); ?> VNĐ
+                            </div>
+                        </div>
                         <button onclick="window.location.href='tc_event_detail.php?id=<?php echo $event['id']; ?>'">Xem</button>
                     </div>
                 <?php endif; ?>

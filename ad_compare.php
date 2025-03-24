@@ -70,15 +70,16 @@ if (!$edited_event) {
     </table>
 
     <form method="post" action="ad_process_edit.php">
-        <input type="hidden" name="event_id" value="<?php echo $event_id; ?>">
-        <input type="hidden" name="edit_id" value="<?php echo $edited_event['id']; ?>">
-        <button type="submit" name="action" value="approve">Chấp nhận</button>
-        <button type="button" onclick="document.getElementById('reject-reason').style.display='block'">Từ chối</button>
-        
-        <div id="reject-reason" style="display:none;">
-            <textarea name="reason" placeholder="Nhập lý do từ chối" required></textarea>
-            <button type="submit" name="action" value="reject">Xác nhận từ chối</button>
-        </div>
-    </form>
+    <input type="hidden" name="event_id" value="<?php echo $event_id; ?>">
+    <input type="hidden" name="edit_id" value="<?php echo $edited_event['id']; ?>">
+    <button type="submit" name="action" value="approve">Chấp nhận</button>
+    <button type="button" onclick="document.getElementById('reject-reason').style.display='block'">Từ chối</button>
+    
+    <div id="reject-reason" style="display:none;">
+        <textarea name="reason" placeholder="Nhập lý do từ chối"></textarea>
+        <button type="submit" name="action" value="reject">Xác nhận từ chối</button>
+    </div>
+</form>
+
 </body>
 </html>
