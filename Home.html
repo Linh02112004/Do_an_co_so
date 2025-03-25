@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style/Home.css">
+    <title>Quản lý sự kiện từ thiện</title>
+</head>
+
+<body>
+    <header>
+        <h1><a href="Home.html">IMPACT VN</a></h1>
+        <div class="header-right">
+            <div id="authLinks">
+                <div class="auth-buttons">
+                    <a id="loginBtn" href="#">Đăng nhập</a> /
+                    <a id="registerBtn" href="#">Đăng ký</a>
+                </div>
+            </div>
+            <nav class="home-link-container">
+                <a href="#gioithieu">Giới thiệu</a>
+                <a href="#huongdan">Hướng dẫn tạo sự kiện</a>
+                <a href="#chucnang">Các chức năng chính</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="gioithieu">
+            <h2>Giới thiệu</h2>
+            <p>Nền tảng giúp tổ chức và quản lý các sự kiện từ thiện một cách hiệu quả.</p>
+        </section>
+        <section id="huongdan">
+            <h2>Hướng dẫn tạo sự kiện</h2>
+            <p>Hướng dẫn chi tiết cách tạo một sự kiện mới và quản lý các sự kiện.</p>
+        </section>
+        <section id="chucnang">
+            <h2>Các chức năng chính</h2>
+            <ul>
+                <li>Quản lý sự kiện</li>
+                <li>Đăng ký tham gia</li>
+                <li>Hỗ trợ và đóng góp</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <h1>IMPACT VN</h1>
+            <ul class="footer-links">
+                <li><a href="#">Điều khoản & Điều kiện</a></li>
+                <li><a href="#">Chính sách bảo mật</a></li>
+                <li><a href="#">Chính sách Cookie</a></li>
+            </ul>
+            <p class="footer-copyright">Copyright © 2025 Community Impact.</p>
+        </div>
+    </footer>
+
+    <!-- Pop-up Đăng nhập -->
+    <div id="loginModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('loginModal')">&times;</span>
+            <h2>Đăng nhập</h2>
+            <select id="loginRole" onchange="updateLoginFields()">
+                <option value="admin">Quản trị viên</option>
+                <option value="organization">Tổ chức</option>
+                <option value="donor">Người quyên góp</option>
+            </select>
+            <div id="loginFields">
+                <input type="email" id="loginEmail" placeholder="Email">
+                <input type="password" id="loginPassword" placeholder="Mật khẩu">
+            </div>
+            <button onclick="login()">Đăng nhập</button>
+        </div>
+    </div>
+
+    <!-- Pop-up Đăng ký -->
+    <div id="registerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('registerModal')">&times;</span>
+            <h2>Đăng ký</h2>
+            <select id="registerRole" onchange="updateRegisterFields()">
+                <option value="organization">Tổ chức</option>
+                <option value="donor">Người quyên góp</option>
+            </select>
+            <div id="registerFields"></div>
+            <button onclick="register()">Đăng ký</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const loginModal = document.getElementById("loginModal");
+            const registerModal = document.getElementById("registerModal");
+            const loginBtn = document.getElementById("loginBtn");
+            const registerBtn = document.getElementById("registerBtn");
+
+            loginBtn.addEventListener("click", function () {
+                loginModal.style.display = "block";
+            });
+            registerBtn.addEventListener("click", function () {
+                registerModal.style.display = "block";
+                updateRegisterFields();
+            });
+
+            window.addEventListener("click", function (event) {
+                if (event.target === loginModal || event.target === registerModal) {
+                    closeModal();
+                }
+            });
+        });
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = "none";
+        }
+
+        function updateLoginFields() {
+            let role = document.getElementById("loginRole").value;
+            let loginFields = document.getElementById("loginFields");
+            if (role === "donor") {
+                loginFields.innerHTML = '<input type="text" placeholder="Số điện thoại hoặc Email">' +
+                    '<input type="password" placeholder="Mật khẩu">';
+            } else {
+                loginFields.innerHTML = '<input type="email" placeholder="Email">' +
+                    '<input type="password" placeholder="Mật khẩu">';
+            }
+        }
+
+        function updateRegisterFields() {
+            let role = document.getElementById("registerRole").value;
+            let registerFields = document.getElementById("registerFields");
+            if (role === "organization") {
+                registerFields.innerHTML = '<input type="text" placeholder="Tên tổ chức">' +
+                    '<input type="email" placeholder="Email">' +
+                    '<input type="password" placeholder="Mật khẩu">';
+            } else {
+                registerFields.innerHTML = '<input type="text" placeholder="Họ và Tên">' +
+                    '<input type="tel" placeholder="Số điện thoại">' +
+                    '<input type="email" placeholder="Email">' +
+                    '<input type="password" placeholder="Mật khẩu">';
+            }
+        }
+    </script>
+</body>
+
+</html>
