@@ -1,14 +1,14 @@
 <?php
-$servername = "localhost"; // Hoặc địa chỉ máy chủ MySQL
-$username = "root"; // Thay bằng username của MySQL
-$password = ""; // Thay bằng password của MySQL
-$database = "charity_management";
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "charity_management";
 
-// Kết nối tới MySQL
-$conn = new mysqli($servername, $username, $password, $database);
+// Tạo kết nối
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-// Kiểm tra lỗi kết nối
+// Kiểm tra kết nối
 if ($conn->connect_error) {
-    die("Kết nối thất bại: " . $conn->connect_error);
+    die("Connection failed: " . $conn->connect_error);
 }
 ?>

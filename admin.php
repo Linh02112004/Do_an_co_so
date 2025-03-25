@@ -1,29 +1,28 @@
 <?php
 session_start();
-require 'db_connect.php';
-
-// Kiểm tra nếu quản trị viên đã đăng nhập
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header("Location: ad_login.php");
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
     exit();
 }
+require 'db_connect.php';
 
-// Cập nhật trạng thái sự kiện khi đủ số tiền
+// Cập nhật trạng thái sự kiện dựa trên tổng số tiền quyên góp
 $conn->query("UPDATE events e
-              LEFT JOIN (SELECT event_id, SUM(amount) AS total_donations FROM donations GROUP BY event_id) d
+              LEFT JOIN (SELECT event_id, SUM(amount) AS total_donations 
+                         FROM donations GROUP BY event_id) d
               ON e.id = d.event_id
               SET e.status = 'completed'
-              WHERE d.total_donations >= e.goal");
+              WHERE COALESCE(d.total_donations, 0) >= e.goal");
 
-// Lấy danh sách sự kiện của tất cả tổ chức
-$sql = "SELECT e.id, e.event_name AS name, e.description, e.status, 
-               u.name AS organization, e.organizer_name, e.goal, 
-               COALESCE(SUM(d.amount), 0) AS amount_raised,
-               (SELECT COUNT(*) FROM event_edits WHERE event_id = e.id AND status = 'pending') AS pending_edits
+// Truy vấn thông tin sự kiện cùng tổ chức và số tiền đã quyên góp
+$sql = "SELECT e.id AS event_id, e.event_name AS name, e.description, e.status,
+               u.organization_name AS organization, e.organizer_name, 
+               e.location, e.goal, COALESCE(SUM(d.amount), 0) AS amount_raised
         FROM events e
         LEFT JOIN donations d ON e.id = d.event_id
         JOIN users u ON e.user_id = u.id
-        GROUP BY e.id, u.name";
+        GROUP BY e.id, u.organization_name";
+
 $result = $conn->query($sql);
 $events = [];
 while ($row = $result->fetch_assoc()) {
@@ -37,15 +36,30 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản trị - Quản lý Sự kiện</title>
-    <link rel="stylesheet" href="ad_styles.css">
+    <title>Impact VN - Quản trị viên</title>
+    <link rel="stylesheet" href="style/admin.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Trang Quản trị</h1>
-        <button onclick="window.location.href='ad_logout.php'">Đăng xuất</button>
+    <header>
+        <h1><a id="homeLink" href="donor.php">IMPACT VN</a></h1>
+        <div class="header-right">
+            <div id="userMenu">
+                <span id="userName">Quản Trị Viên</span>
+                <span id="arrowDown" class="arrow">▼</span>
+                <div id="dropdown" class="dropdown-content">
+                    <a href="logout.php">Đăng xuất</a>
+                </div>
+            </div>
+        </div>
+    </header>
 
-        <h2>Đang diễn ra</h2>
+    <main>
+        <div id="searchBoxContainer">
+            <input type="text" id="searchBox" placeholder="Tìm kiếm sự kiện">
+            <button id="searchButton">Tìm kiếm</button>
+        </div>
+
+        <h2>Sự kiện đang diễn ra</h2>
         <div id="ongoing-events" class="events-list">
             <?php foreach ($events as $event): ?>
                 <?php if ($event['status'] === 'ongoing' && $event['amount_raised'] < $event['goal']): ?>
@@ -64,7 +78,7 @@ $conn->close();
             <?php endforeach; ?>
         </div>
 
-        <h2>Đã hoàn thành</h2>
+        <h2>Sự kiện đã hoàn thành</h2>
         <div id="completed-events" class="events-list">
             <?php foreach ($events as $event): ?>
                 <?php if ($event['status'] === 'completed' || $event['amount_raised'] >= $event['goal']): ?>
@@ -79,6 +93,18 @@ $conn->close();
                 <?php endif; ?>
             <?php endforeach; ?>
         </div>
-    </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <h1>IMPACT VN</h1>
+            <ul class="footer-links">
+                <li><a href="#">Điều khoản & Điều kiện</a></li>
+                <li><a href="#">Chính sách bảo mật</a></li>
+                <li><a href="#">Chính sách Cookie</a></li>
+            </ul>
+            <p class="footer-copyright">Copyright © 2025 Community Impact.</p>
+        </div>
+    </footer>
 </body>
 </html>

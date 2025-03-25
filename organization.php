@@ -1,17 +1,28 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: tc_dang_nhap.php");
+    header("Location: login.php");
     exit();
 }
 require 'db_connect.php';
 
 $user_id = $_SESSION['user_id'];
 
+// Lấy tên tổ chức của người dùng
+$sql_user = "SELECT organization_name FROM users WHERE id = ?";
+if ($stmt = $conn->prepare($sql_user)) {
+    $stmt->bind_param("s", $user_id);
+    $stmt->execute();
+    $result_user = $stmt->get_result();
+    $user = $result_user->fetch_assoc();
+    $stmt->close();
+}
+$organization_name = $user ? htmlspecialchars($user['organization_name']) : "Tổ chức";
+
 // Lấy thông báo chưa đọc mới nhất
 $sql_notification = "SELECT id, message FROM notifications WHERE user_id = ? AND seen = 0 ORDER BY created_at DESC LIMIT 1";
 $stmt_notification = $conn->prepare($sql_notification);
-$stmt_notification->bind_param("i", $user_id);
+$stmt_notification->bind_param("s", $user_id);
 $stmt_notification->execute();
 $result_notification = $stmt_notification->get_result();
 $notification = $result_notification->fetch_assoc();
@@ -35,15 +46,15 @@ $conn->query("UPDATE events e
 
 // Lấy danh sách sự kiện của tổ chức đang đăng nhập
 $sql = "SELECT e.id, e.event_name AS name, e.description, e.status, 
-               u.name AS organization, e.organizer_name, e.goal, 
+               u.organization_name AS organization, e.organizer_name, e.goal, 
                COALESCE(SUM(d.amount), 0) AS amount_raised
         FROM events e
         LEFT JOIN donations d ON e.id = d.event_id
         JOIN users u ON e.user_id = u.id
         WHERE e.user_id = ?
-        GROUP BY e.id, u.name";
+        GROUP BY e.id, u.organization_name, e.event_name, e.description, e.status, e.organizer_name, e.goal";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param("s", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $events = [];
@@ -59,22 +70,36 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Chủ - Quản lý Sự kiện</title>
-    <link rel="stylesheet" href="tc_styles.css">
+    <title>Impact VN - Tổ chức</title>
+    <link rel="stylesheet" href="style/organization.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Chào mừng, <?php echo $_SESSION['user_name']; ?>!</h1>
-        <button onclick="window.location.href='tc_tao_su_kien.html'">Tạo Sự kiện</button>
-        <button onclick="window.location.href='dang_xuat.php'">Đăng xuất</button>
-        
+    <header>
+        <h1><a id="homeLink" href="donor.php">IMPACT VN</a></h1>
+        <div class="header-right">
+            <div id="userMenu">
+                <span id="userName">Xin chào, Tổ chức <?php echo $organization_name; ?></span>
+                <span id="arrowDown" class="arrow">▼</span>
+                <div id="dropdown" class="dropdown-content">
+                    <a href="logout.php">Đăng xuất</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div id="searchBoxContainer">
+            <input type="text" id="searchBox" placeholder="Tìm kiếm sự kiện">
+            <button id="searchButton">Tìm kiếm</button>
+        </div>
+
         <?php if (!empty($notification)) : ?>
             <div class="notification">
                 <p><?php echo htmlspecialchars($notification['message']); ?></p>
             </div>
         <?php endif; ?>
 
-        <h2>Đang diễn ra</h2>
+        <h2>Sự kiện đang diễn ra</h2>
         <div id="ongoing-events" class="events-list">
             <?php foreach ($events as $event): ?>
                 <?php if ($event['status'] === 'ongoing' && $event['amount_raised'] < $event['goal']): ?>
@@ -99,7 +124,7 @@ $conn->close();
             <?php endforeach; ?>
         </div>
         
-        <h2>Đã hoàn thành</h2>
+        <h2>Sự kiện đã hoàn thành</h2>
         <div id="completed-events" class="events-list">
             <?php foreach ($events as $event): ?>
                 <?php if ($event['status'] === 'completed' || $event['amount_raised'] >= $event['goal']): ?>
@@ -123,6 +148,19 @@ $conn->close();
                 <?php endif; ?>
             <?php endforeach; ?>
         </div>
-    </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <h1>IMPACT VN</h1>
+            <ul class="footer-links">
+                <li><a href="#">Điều khoản & Điều kiện</a></li>
+                <li><a href="#">Chính sách bảo mật</a></li>
+                <li><a href="#">Chính sách Cookie</a></li>
+            </ul>
+            <p class="footer-copyright">Copyright © 2025 Community Impact.</p>
+        </div>
+    </footer>
+
 </body>
 </html>

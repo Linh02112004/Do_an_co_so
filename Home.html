@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style/Home.css">
-    <title>Quản lý sự kiện từ thiện</title>
+    <title>Impact VN</title>
 </head>
 
 <body>
@@ -62,16 +62,18 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal('loginModal')">&times;</span>
             <h2>Đăng nhập</h2>
-            <select id="loginRole" onchange="updateLoginFields()">
-                <option value="admin">Quản trị viên</option>
-                <option value="organization">Tổ chức</option>
-                <option value="donor">Người quyên góp</option>
-            </select>
-            <div id="loginFields">
-                <input type="email" id="loginEmail" placeholder="Email">
-                <input type="password" id="loginPassword" placeholder="Mật khẩu">
-            </div>
-            <button onclick="login()">Đăng nhập</button>
+            <form action="login.php" method="POST">
+                <select name="loginRole" id="loginRole" onchange="updateLoginFields()">
+                    <option value="admin">Quản trị viên</option>
+                    <option value="organization">Tổ chức</option>
+                    <option value="donor">Người quyên góp</option>
+                </select>
+                <div id="loginFields">
+                    <input type="email" name="loginIdentity" id="loginIdentity" placeholder="Email" required>
+                    <input type="password" name="loginPassword" id="loginPassword" placeholder="Mật khẩu" required>
+                </div>
+                <button type="submit">Đăng nhập</button>
+            </form>
         </div>
     </div>
 
@@ -80,12 +82,14 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal('registerModal')">&times;</span>
             <h2>Đăng ký</h2>
-            <select id="registerRole" onchange="updateRegisterFields()">
-                <option value="organization">Tổ chức</option>
-                <option value="donor">Người quyên góp</option>
-            </select>
-            <div id="registerFields"></div>
-            <button onclick="register()">Đăng ký</button>
+            <form action="register.php" method="POST">
+                <select name="registerRole" id="registerRole" onchange="updateRegisterFields()">
+                    <option value="organization">Tổ chức</option>
+                    <option value="donor">Người quyên góp</option>
+                </select>
+                <div id="registerFields"></div>
+                <button type="submit">Đăng ký</button>
+            </form>
         </div>
     </div>
 
@@ -119,11 +123,15 @@
             let role = document.getElementById("loginRole").value;
             let loginFields = document.getElementById("loginFields");
             if (role === "donor") {
-                loginFields.innerHTML = '<input type="text" placeholder="Số điện thoại hoặc Email">' +
-                    '<input type="password" placeholder="Mật khẩu">';
+                loginFields.innerHTML = `
+                <input type="text" name="loginIdentity" placeholder="Số điện thoại hoặc Email" required>
+                <input type="password" name="loginPassword" placeholder="Mật khẩu" required>
+            `;
             } else {
-                loginFields.innerHTML = '<input type="email" placeholder="Email">' +
-                    '<input type="password" placeholder="Mật khẩu">';
+                loginFields.innerHTML = `
+                <input type="email" name="loginIdentity" placeholder="Email" required>
+                <input type="password" name="loginPassword" placeholder="Mật khẩu" required>
+            `;
             }
         }
 
@@ -131,17 +139,22 @@
             let role = document.getElementById("registerRole").value;
             let registerFields = document.getElementById("registerFields");
             if (role === "organization") {
-                registerFields.innerHTML = '<input type="text" placeholder="Tên tổ chức">' +
-                    '<input type="email" placeholder="Email">' +
-                    '<input type="password" placeholder="Mật khẩu">';
+                registerFields.innerHTML = `
+                <input type="text" name="orgName" placeholder="Tên tổ chức" required>
+                <input type="email" name="registerEmail" placeholder="Email" required>
+                <input type="password" name="registerPassword" placeholder="Mật khẩu" required>
+            `;
             } else {
-                registerFields.innerHTML = '<input type="text" placeholder="Họ và Tên">' +
-                    '<input type="tel" placeholder="Số điện thoại">' +
-                    '<input type="email" placeholder="Email">' +
-                    '<input type="password" placeholder="Mật khẩu">';
+                registerFields.innerHTML = `
+                <input type="text" name="fullName" placeholder="Họ và Tên" required>
+                <input type="tel" name="phone" placeholder="Số điện thoại" required>
+                <input type="email" name="registerEmail" placeholder="Email" required>
+                <input type="password" name="registerPassword" placeholder="Mật khẩu" required>
+            `;
             }
         }
     </script>
+
 </body>
 
 </html>
