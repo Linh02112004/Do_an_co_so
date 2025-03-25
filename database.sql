@@ -74,6 +74,20 @@ CREATE TABLE participants (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    event_id INT NOT NULL,
+    user_id INT NOT NULL,
+    parent_id INT DEFAULT NULL, -- Nếu NULL, là bình luận gốc. Nếu có ID, là trả lời.
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
+);
+
+
 -- Tạo một tài khoản tổ chức mẫu (Mật khẩu là "password" nhưng cần mã hóa khi dùng thực tế)
 -- INSERT INTO users (name, email, password) 
 -- VALUES ('Tổ chức ABC', 'abc@example.com', 'password123');
