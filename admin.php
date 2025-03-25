@@ -41,10 +41,10 @@ $conn->close();
 </head>
 <body>
     <header>
-        <h1><a id="homeLink" href="donor.php">IMPACT VN</a></h1>
+        <h1><a id="homeLink" href="admin.php">IMPACT VN</a></h1>
         <div class="header-right">
             <div id="userMenu">
-                <span id="userName">Quản Trị Viên</span>
+                <span id="userName">Xin chào, Quản Trị Viên</span>
                 <span id="arrowDown" class="arrow">▼</span>
                 <div id="dropdown" class="dropdown-content">
                     <a href="logout.php">Đăng xuất</a>

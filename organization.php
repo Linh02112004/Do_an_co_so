@@ -75,13 +75,27 @@ $conn->close();
 </head>
 <body>
     <header>
-        <h1><a id="homeLink" href="donor.php">IMPACT VN</a></h1>
+        <h1><a id="homeLink" href="organization.php">IMPACT VN</a></h1>
         <div class="header-right">
             <div id="userMenu">
                 <span id="userName">Xin chào, Tổ chức <?php echo $organization_name; ?></span>
                 <span id="arrowDown" class="arrow">▼</span>
                 <div id="dropdown" class="dropdown-content">
+                    <a href="#">Cập nhật thông tin</a>
+                    <a href="#">Thay đổi mật khẩu</a>
                     <a href="logout.php">Đăng xuất</a>
+                </div>
+            </div>
+
+            <div id="authLinks" style="margin-left: auto;">
+                <div class="auth-buttons">
+                    <a id="createEventButton" href="#">Tạo sự kiện</a>
+                    <a id="notifications" href="#">Thông báo</a>
+                    <?php if (!empty($notification)) : ?>
+                        <div class="notification">
+                            <p><?php echo htmlspecialchars($notification['message']); ?></p>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -92,12 +106,6 @@ $conn->close();
             <input type="text" id="searchBox" placeholder="Tìm kiếm sự kiện">
             <button id="searchButton">Tìm kiếm</button>
         </div>
-
-        <?php if (!empty($notification)) : ?>
-            <div class="notification">
-                <p><?php echo htmlspecialchars($notification['message']); ?></p>
-            </div>
-        <?php endif; ?>
 
         <h2>Sự kiện đang diễn ra</h2>
         <div id="ongoing-events" class="events-list">
@@ -161,6 +169,76 @@ $conn->close();
             <p class="footer-copyright">Copyright © 2025 Community Impact.</p>
         </div>
     </footer>
+
+    <!-- Pop-up Tạo sự kiện -->
+    <div id="create_eventModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('loginModal')">&times;</span>
+            <h1>Tạo sự kiện</h1>
+            <form action="tc_luu_su_kien.php" method="POST">
+                <div class="form-container">
+                    <!-- Thông tin Sự kiện -->
+                    <div class="form-section">
+                        <h2>Thông tin Sự kiện</h2>
+                        <label for="event_name">Tên sự kiện:</label>
+                        <input type="text" id="event_name" name="event_name" required>
+
+                        <label for="description">Mô tả:</label>
+                        <textarea id="description" name="description" required></textarea>
+
+                        <label for="location">Địa điểm hỗ trợ:</label>
+                        <input type="text" id="location" name="location" required>
+
+                        <label for="goal">Mục tiêu quyên góp:</label>
+                        <input type="number" id="goal" name="goal" required>
+                    </div>
+
+                    <!-- Thông tin Người phụ trách -->
+                    <div class="form-section">
+                        <h2>Thông tin Người phụ trách</h2>
+                        <label for="organizer_name">Họ tên:</label>
+                        <input type="text" id="organizer_name" name="organizer_name" required>
+
+                        <label for="phone">Số điện thoại:</label>
+                        <input type="tel" id="phone" name="phone" required>
+
+                        <label for="address">Địa chỉ:</label>
+                        <input type="text" id="address" name="address" required>
+
+                        <label for="bank_account">Số tài khoản:</label>
+                        <input type="text" id="bank_account" name="bank_account" required>
+
+                        <label for="bank_name">Ngân hàng:</label>
+                        <input type="text" id="bank_name" name="bank_name" required>
+                    </div>
+                </div>
+                <button type="submit">Tạo Sự kiện</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const create_eventModal = document.getElementById("create_eventModal");
+            const createEventButton = document.getElementById("createEventButton");
+            const closeButton = create_eventModal.querySelector(".close");
+
+            createEventButton.addEventListener("click", function (event) {
+                event.preventDefault(); 
+                create_eventModal.style.display = "block";
+            });
+
+            closeButton.addEventListener("click", function () {
+                create_eventModal.style.display = "none";
+            });
+
+            window.addEventListener("click", function (event) {
+                if (event.target === create_eventModal) {
+                    create_eventModal.style.display = "none";
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>
