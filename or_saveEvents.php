@@ -28,9 +28,9 @@ if (empty($event_name) || empty($description) || empty($location) || empty($goal
 
 // Chèn dữ liệu vào bảng events
 $sql = "INSERT INTO events (event_name, description, location, goal, organizer_name, phone, bank_account, bank_name, status, user_id) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sssdsssssss", $event_name, $description, $location, $goal, $organizer_name, $phone, $bank_account, $bank_name, $status, $user_id);
+$stmt->bind_param("sssdssssss", $event_name, $description, $location, $goal, $organizer_name, $phone, $bank_account, $bank_name, $status, $user_id);
 
 if ($stmt->execute()) {
     echo "<script>alert('Sự kiện đã được tạo thành công!'); window.location.href='organization.php';</script>";
