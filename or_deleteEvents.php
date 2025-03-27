@@ -14,12 +14,25 @@ $stmt->bind_param("i", $event_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $donation = $result->fetch_assoc();
+$stmt->close();
 
 if ($donation["donation_count"] > 0) {
     die("Không thể xóa sự kiện vì đã có quyên góp.");
 }
 
-$stmt->close();
+// Xóa dữ liệu liên quan trước khi xóa sự kiện
+$sql_delete_related = [
+    "DELETE FROM comments WHERE event_id = ?",
+    "DELETE FROM event_edits WHERE event_id = ?",
+    "DELETE FROM notifications WHERE user_id IN (SELECT user_id FROM events WHERE id = ?)"
+];
+
+foreach ($sql_delete_related as $query) {
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $event_id);
+    $stmt->execute();
+    $stmt->close();
+}
 
 // Xóa sự kiện
 $sql_delete = "DELETE FROM events WHERE id = ?";
@@ -34,6 +47,7 @@ if ($stmt->execute()) {
 $stmt->close();
 $conn->close();
 
-header("Location: tc_index.php");
+// Chuyển hướng về trang danh sách sự kiện
+header("Location: organization.php");
 exit();
 ?>

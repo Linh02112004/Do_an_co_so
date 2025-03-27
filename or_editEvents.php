@@ -14,36 +14,43 @@ $stmt->bind_param("i", $event_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $event = $result->fetch_assoc();
+$stmt->close();
 
 if (!$event) {
     die("Sự kiện không tồn tại.");
 }
 
-$stmt->close();
-
 // Xử lý cập nhật sự kiện
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $event_name = $_POST["event_name"];
-    $description = $_POST["description"];
-    $location = $_POST["location"];
-    $goal = $_POST["goal"];
-    $organizer_name = $_POST["organizer_name"];
-    $phone = $_POST["phone"];
-    $address = $_POST["address"];
+    if (
+        isset($_POST["event_name"], $_POST["description"], $_POST["location"], 
+              $_POST["goal"], $_POST["organizer_name"], $_POST["phone"])
+    ) {
+        $event_name = trim($_POST["event_name"]);
+        $description = trim($_POST["description"]);
+        $location = trim($_POST["location"]);
+        $goal = floatval($_POST["goal"]);
+        $organizer_name = trim($_POST["organizer_name"]);
+        $phone = trim($_POST["phone"]);
 
-    $sql_update = "UPDATE events SET event_name=?, description=?, location=?, goal=?, organizer_name=?, phone=?, address=? WHERE id=?";
-    $stmt = $conn->prepare($sql_update);
-    $stmt->bind_param("sssdsssi", $event_name, $description, $location, $goal, $organizer_name, $phone, $address, $event_id);
+        $sql_update = "UPDATE events 
+                       SET event_name=?, description=?, location=?, goal=?, organizer_name=?, phone=? 
+                       WHERE id=?";
+        $stmt = $conn->prepare($sql_update);
+        $stmt->bind_param("sssdssi", $event_name, $description, $location, $goal, $organizer_name, $phone, $event_id);
 
-    if ($stmt->execute()) {
-        echo "Sự kiện đã được cập nhật thành công.";
-        header("Location: tc_event_detail.php?id=".$event_id);
-        exit();
+        if ($stmt->execute()) {
+            echo "Sự kiện đã được cập nhật thành công.";
+            header("Location: tc_event_detail.php?id=" . $event_id);
+            exit();
+        } else {
+            echo "Lỗi khi cập nhật sự kiện.";
+        }
+
+        $stmt->close();
     } else {
-        echo "Lỗi khi cập nhật sự kiện.";
+        echo "Thiếu thông tin cập nhật sự kiện.";
     }
-
-    $stmt->close();
 }
 
 $conn->close();

@@ -126,7 +126,7 @@ $conn->close();
                                 <?php echo number_format($raised, 0, ',', '.'); ?> / <?php echo number_format($goal, 0, ',', '.'); ?> VNĐ
                             </div>
                         </div>
-                        <button onclick="window.location.href='tc_event_detail.php?id=<?php echo $event['id']; ?>'">Xem</button>
+                        <button onclick="window.location.href='or_eventDetails.php?id=<?php echo $event['id']; ?>'">Xem</button>
                     </div>
                 <?php endif; ?>
             <?php endforeach; ?>
@@ -151,7 +151,7 @@ $conn->close();
                                 <?php echo number_format($raised, 0, ',', '.'); ?> / <?php echo number_format($goal, 0, ',', '.'); ?> VNĐ
                             </div>
                         </div>
-                        <button onclick="window.location.href='tc_event_detail.php?id=<?php echo $event['id']; ?>'">Xem</button>
+                        <button onclick="window.location.href='or_eventDetails.php?id=<?php echo $event['id']; ?>'">Xem</button>
                     </div>
                 <?php endif; ?>
             <?php endforeach; ?>
@@ -175,7 +175,7 @@ $conn->close();
         <div class="modal-content">
             <span class="close" onclick="closeModal('loginModal')">&times;</span>
             <h1>Tạo sự kiện</h1>
-            <form action="tc_luu_su_kien.php" method="POST">
+            <form action="or_saveEvents.php" method="POST">
                 <div class="form-container">
                     <!-- Thông tin Sự kiện -->
                     <div class="form-section">
@@ -202,14 +202,29 @@ $conn->close();
                         <label for="phone">Số điện thoại:</label>
                         <input type="tel" id="phone" name="phone" required>
 
-                        <label for="address">Địa chỉ:</label>
-                        <input type="text" id="address" name="address" required>
-
                         <label for="bank_account">Số tài khoản:</label>
                         <input type="text" id="bank_account" name="bank_account" required>
 
-                        <label for="bank_name">Ngân hàng:</label>
-                        <input type="text" id="bank_name" name="bank_name" required>
+                        <label for="bank_name">Ngân hàng thụ hưởng:</label>
+                        <select id="bank_name" name="bank_name" required>
+                            <?php 
+                            $bank_codes = [
+                                "BIDV" => "BIDV",
+                                "Vietcombank" => "VCB",
+                                "Techcombank" => "TCB",
+                                "Agribank" => "VBA",
+                                "ACB" => "ACB",
+                                "MB Bank" => "MB",
+                                "VPBank" => "VPB"
+                            ];
+                            $selected_bank = $user['bank_name'] ?? '';
+                            foreach ($bank_codes as $name => $code): 
+                            ?>
+                                <option value="<?= htmlspecialchars($name) ?>" <?= ($selected_bank == $name) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($name) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                 </div>
                 <button type="submit">Tạo Sự kiện</button>

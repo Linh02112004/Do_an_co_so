@@ -10,7 +10,6 @@ if (!isset($_SESSION["user_id"])) {
     $user_id = $_SESSION["user_id"]; // Lấy ID từ session
 }
 
-
 if (!isset($_GET["id"])) {
     die("Sự kiện không tồn tại.");
 }

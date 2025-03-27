@@ -406,7 +406,8 @@ footer {
 
 /* Input và Textarea */
 .form-section input,
-.form-section textarea {
+.form-section textarea,
+.form-section select {
     width: 100%;
     padding: 10px;
     margin: 10px 0;

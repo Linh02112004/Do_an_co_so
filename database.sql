@@ -89,7 +89,6 @@ CREATE TABLE IF NOT EXISTS events (
     goal DECIMAL(15,2) NOT NULL,
     organizer_name VARCHAR(255) NOT NULL,
     phone VARCHAR(20) NOT NULL,
-    address VARCHAR(255) NOT NULL,
     bank_account VARCHAR(50) NOT NULL,
     bank_name VARCHAR(100) NOT NULL,
     status ENUM('ongoing', 'completed') DEFAULT 'ongoing',
