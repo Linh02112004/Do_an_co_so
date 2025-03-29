@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($stmt->execute()) {
             echo "Sự kiện đã được cập nhật thành công.";
-            header("Location: tc_event_detail.php?id=" . $event_id);
+            header("Location: or_eventDetails.php?id=" . $event_id);
             exit();
         } else {
             echo "Lỗi khi cập nhật sự kiện.";
@@ -81,6 +81,6 @@ $conn->close();
         <input type="text" name="address" value="<?php echo htmlspecialchars($event['address']); ?>" required><br>
         <button type="submit">Cập nhật</button>
     </form>
-    <button onclick="window.location.href='tc_event_detail.php?id=<?php echo $event_id; ?>'">Hủy</button>
+    <button onclick="window.location.href='or_eventDetails.php?id=<?php echo $event_id; ?>'">Hủy</button>
 </body>
 </html>

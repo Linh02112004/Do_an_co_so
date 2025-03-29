@@ -183,14 +183,14 @@ $conn->close();
                         <label for="event_name">Tên sự kiện:</label>
                         <input type="text" id="event_name" name="event_name" required>
 
-                        <label for="description">Mô tả:</label>
-                        <textarea id="description" name="description" required></textarea>
-
                         <label for="location">Địa điểm hỗ trợ:</label>
                         <input type="text" id="location" name="location" required>
 
                         <label for="goal">Mục tiêu quyên góp:</label>
                         <input type="number" id="goal" name="goal" required>
+                        
+                        <label for="description">Mô tả:</label>
+                        <textarea id="description" name="description" required></textarea>
                     </div>
 
                     <!-- Thông tin Người phụ trách -->

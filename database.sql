@@ -115,7 +115,9 @@ CREATE TABLE IF NOT EXISTS event_edits (
     user_id VARCHAR(10) NOT NULL,  -- Ai sửa?
     event_name VARCHAR(255),
     description TEXT,
+    location VARCHAR(255) NOT NULL,
     organizer_name VARCHAR(255),
+    phone VARCHAR(20) NOT NULL,
     goal DECIMAL(15,2),
     status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
     reason TEXT,  -- Lý do từ chối (nếu có)
