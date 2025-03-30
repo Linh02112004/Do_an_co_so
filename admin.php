@@ -68,11 +68,21 @@ $conn->close();
                             <span class="warning-icon">❗</span>
                         <?php endif; ?>
                         <h3><?php echo htmlspecialchars($event['name']); ?></h3>
+                        <div class="event-description"><?= nl2br(htmlspecialchars($event['description'])) ?></div>
                         <p><strong>Tổ chức:</strong> <?php echo htmlspecialchars($event['organization']); ?></p>
                         <p><strong>Người phụ trách:</strong> <?php echo htmlspecialchars($event['organizer_name']); ?></p>
-                        <p><strong>Mục tiêu:</strong> <?php echo number_format($event['goal']); ?> VND</p>
-                        <p><strong>Đã quyên góp:</strong> <?php echo number_format($event['amount_raised']); ?> VND</p>
-                        <button onclick="window.location.href='ad_event_detail.php?id=<?php echo $event['id']; ?>'">Xem</button>
+                        <p><strong>Địa điểm hỗ trợ:</strong> <?= htmlspecialchars($event['location']) ?></p>
+                        <?php
+                        $goal = $event['goal'];
+                        $raised = $event['amount_raised'];
+                        $progress = ($goal > 0) ? min(100, ($raised / $goal) * 100) : 0;
+                        ?>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: <?php echo $progress; ?>%;">
+                            <?php echo $progress; ?>%
+                            </div>
+                        </div>
+                        <button onclick="window.location.href='ad_eventDetails.php?id=<?php echo $event['event_id']; ?>'">Xem</button>
                     </div>
                 <?php endif; ?>
             <?php endforeach; ?>
@@ -83,12 +93,22 @@ $conn->close();
             <?php foreach ($events as $event): ?>
                 <?php if ($event['status'] === 'completed' || $event['amount_raised'] >= $event['goal']): ?>
                     <div class="event-card">
-                        <h3><?php echo htmlspecialchars($event['name']); ?></h3>
+                    <h3><?php echo htmlspecialchars($event['name']); ?></h3>
+                        <p><?= nl2br(htmlspecialchars($event['description'])) ?></p>
                         <p><strong>Tổ chức:</strong> <?php echo htmlspecialchars($event['organization']); ?></p>
                         <p><strong>Người phụ trách:</strong> <?php echo htmlspecialchars($event['organizer_name']); ?></p>
-                        <p><strong>Mục tiêu:</strong> <?php echo number_format($event['goal']); ?> VND</p>
-                        <p><strong>Đã quyên góp:</strong> <?php echo number_format($event['amount_raised']); ?> VND</p>
-                        <button onclick="window.location.href='ad_event_detail.php?id=<?php echo $event['id']; ?>'">Xem</button>
+                        <p><strong>Địa điểm hỗ trợ:</strong> <?= htmlspecialchars($event['location']) ?></p>
+                        <?php
+                        $goal = $event['goal'];
+                        $raised = $event['amount_raised'];
+                        $progress = ($goal > 0) ? min(100, ($raised / $goal) * 100) : 0;
+                        ?>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: <?php echo $progress; ?>%;">
+                            <?php echo $progress; ?>%
+                            </div>
+                        </div>
+                        <button onclick="window.location.href='ad_eventDetails.php?id=<?php echo $event['event_id']; ?>'">Xem</button>
                     </div>
                 <?php endif; ?>
             <?php endforeach; ?>
@@ -106,5 +126,7 @@ $conn->close();
             <p class="footer-copyright">Copyright © 2025 Community Impact.</p>
         </div>
     </footer>
+
+    <script src="script.js" defer></script>
 </body>
 </html>

@@ -46,13 +46,13 @@ $conn->query("UPDATE events e
 
 // Lấy danh sách sự kiện của tổ chức đang đăng nhập
 $sql = "SELECT e.id, e.event_name AS name, e.description, e.status, 
-               u.organization_name AS organization, e.organizer_name, e.goal, 
+               u.organization_name AS organization, e.organizer_name, e.location, e.goal, 
                COALESCE(SUM(d.amount), 0) AS amount_raised
         FROM events e
         LEFT JOIN donations d ON e.id = d.event_id
         JOIN users u ON e.user_id = u.id
         WHERE e.user_id = ?
-        GROUP BY e.id, u.organization_name, e.event_name, e.description, e.status, e.organizer_name, e.goal";
+        GROUP BY e.id, u.organization_name, e.event_name, e.description, e.status, e.organizer_name, e.location, e.goal";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $user_id);
 $stmt->execute();
@@ -112,18 +112,19 @@ $conn->close();
             <?php foreach ($events as $event): ?>
                 <?php if ($event['status'] === 'ongoing' && $event['amount_raised'] < $event['goal']): ?>
                     <div class="event-card">
-                        <h3><?php echo htmlspecialchars($event['name']); ?></h3>
+                    <h3><?php echo htmlspecialchars($event['name']); ?></h3>
+                        <div class="event-description"><?= nl2br(htmlspecialchars($event['description'])) ?></div>
                         <p><strong>Tổ chức:</strong> <?php echo htmlspecialchars($event['organization']); ?></p>
                         <p><strong>Người phụ trách:</strong> <?php echo htmlspecialchars($event['organizer_name']); ?></p>
+                        <p><strong>Địa điểm hỗ trợ:</strong> <?= htmlspecialchars($event['location']) ?></p>
                         <?php
                         $goal = $event['goal'];
                         $raised = $event['amount_raised'];
                         $progress = ($goal > 0) ? min(100, ($raised / $goal) * 100) : 0;
                         ?>
-                        <!-- Thanh tiến độ -->
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: <?php echo $progress; ?>%;">
-                                <?php echo number_format($raised, 0, ',', '.'); ?> / <?php echo number_format($goal, 0, ',', '.'); ?> VNĐ
+                        <div class="progress-bar">
+                            <div class="progress" style="width: <?php echo $progress; ?>%;">
+                            <?php echo $progress; ?>%
                             </div>
                         </div>
                         <button onclick="window.location.href='or_eventDetails.php?id=<?php echo $event['id']; ?>'">Xem</button>
@@ -137,18 +138,19 @@ $conn->close();
             <?php foreach ($events as $event): ?>
                 <?php if ($event['status'] === 'completed' || $event['amount_raised'] >= $event['goal']): ?>
                     <div class="event-card">
-                        <h3><?php echo htmlspecialchars($event['name']); ?></h3>
+                    <h3><?php echo htmlspecialchars($event['name']); ?></h3>
+                        <p><?= nl2br(htmlspecialchars($event['description'])) ?></p>
                         <p><strong>Tổ chức:</strong> <?php echo htmlspecialchars($event['organization']); ?></p>
                         <p><strong>Người phụ trách:</strong> <?php echo htmlspecialchars($event['organizer_name']); ?></p>
+                        <p><strong>Địa điểm hỗ trợ:</strong> <?= htmlspecialchars($event['location']) ?></p>
                         <?php
                         $goal = $event['goal'];
                         $raised = $event['amount_raised'];
                         $progress = ($goal > 0) ? min(100, ($raised / $goal) * 100) : 0;
                         ?>
-                        <!-- Thanh tiến độ -->
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: <?php echo $progress; ?>%;">
-                                <?php echo number_format($raised, 0, ',', '.'); ?> / <?php echo number_format($goal, 0, ',', '.'); ?> VNĐ
+                        <div class="progress-bar">
+                            <div class="progress" style="width: <?php echo $progress; ?>%;">
+                            <?php echo $progress; ?>%
                             </div>
                         </div>
                         <button onclick="window.location.href='or_eventDetails.php?id=<?php echo $event['id']; ?>'">Xem</button>
@@ -232,7 +234,7 @@ $conn->close();
         </div>
     </div>
 
-    <script>
+    <script src="script.js" defer>
         document.addEventListener("DOMContentLoaded", function () {
             const create_eventModal = document.getElementById("create_eventModal");
             const createEventButton = document.getElementById("createEventButton");

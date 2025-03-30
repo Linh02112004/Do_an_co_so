@@ -3,7 +3,7 @@ session_start();
 require 'db_connect.php';
 
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header("Location: ad_login.php");
+    header("Location: login.php");
     exit();
 }
 
@@ -31,16 +31,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['event_id'], $_POST['a
                        description = ?, 
                        location = ?, 
                        goal = ?, 
-                       organizer_name = ?
+                       organizer_name = ?, 
+                       phone = ?
                        WHERE id = ?";
         $stmt_update = $conn->prepare($sql_update);
         $stmt_update->bind_param(
-            "sssisi", 
+            "sssissi", 
             $edited_event['event_name'], 
             $edited_event['description'], 
             $edited_event['location'], 
             $edited_event['goal'], 
             $edited_event['organizer_name'], 
+            $edited_event['phone'], 
             $event_id
         );
         if (!$stmt_update->execute()) {
@@ -72,9 +74,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['event_id'], $_POST['a
     }
 
     // Xóa bản ghi chỉnh sửa sau khi xử lý
-    $conn->query("DELETE FROM event_edits WHERE event_id = $event_id");
+    $sql_delete_edit = "DELETE FROM event_edits WHERE event_id = ?";
+    $stmt_delete = $conn->prepare($sql_delete_edit);
+    $stmt_delete->bind_param("i", $event_id);
+    $stmt_delete->execute();
+    $stmt_delete->close();
 
-    header("Location: ad_index.php");
+    header("Location: admin.php");
     exit();
 } else {
     die("Yêu cầu không hợp lệ.");

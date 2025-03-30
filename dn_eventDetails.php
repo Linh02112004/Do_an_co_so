@@ -2,26 +2,40 @@
 require 'db_connect.php';
 
 session_start();
-if (!isset($_SESSION["user_id"])) {
-    $logged_in = false;
-} else {
-    $logged_in = true;
-    $user_name = $_SESSION["user_name"]; // Lấy tên từ session
-    $user_id = $_SESSION["user_id"]; // Lấy ID từ session
+$full_name = "Người dùng"; // Giá trị mặc định
+
+if (isset($_SESSION["user_id"])) {
+    $user_id = $_SESSION["user_id"];
+    
+    $sql_user = "SELECT full_name FROM users WHERE id = ?";
+    if ($stmt = $conn->prepare($sql_user)) {
+        $stmt->bind_param("s", $user_id);
+        $stmt->execute();
+        $result_user = $stmt->get_result();
+        $user = $result_user->fetch_assoc();
+        $stmt->close();
+        
+        if ($user) {
+            $full_name = htmlspecialchars($user['full_name']);
+        }
+    }
 }
 
 if (!isset($_GET["id"])) {
     die("Sự kiện không tồn tại.");
 }
 
+// Truy vấn thông tin sự kiện và tổng tiền quyên góp
 $event_id = intval($_GET["id"]);
-$sql = "SELECT e.*, u.name AS organizer, 
+$sql = "SELECT e.*, 
+               u.organization_name AS organizer, 
+               u.full_name AS organizer_full_name,
                (SELECT COALESCE(SUM(amount), 0) FROM donations WHERE event_id = e.id) AS total_donated,
-               (SELECT COUNT(*) FROM donations WHERE event_id = e.id) AS donation_count,
-               e.bank_account, e.bank_name
+               (SELECT COUNT(*) FROM donations WHERE event_id = e.id) AS donation_count
         FROM events e 
         JOIN users u ON e.user_id = u.id 
         WHERE e.id = ?";
+
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $event_id);
 $stmt->execute();
@@ -35,13 +49,16 @@ if (!$event) {
 $stmt->close();
 
 // Lấy danh sách quyên góp
-$sql_donations = "SELECT donor_name, amount, donated_at FROM donations WHERE event_id = ? ORDER BY donated_at DESC";
+$sql_donations = "SELECT u.full_name AS donor_name, d.amount, d.donated_at 
+                  FROM donations d 
+                  JOIN users u ON d.donor_id = u.id 
+                  WHERE d.event_id = ? 
+                  ORDER BY d.donated_at DESC";
 $stmt = $conn->prepare($sql_donations);
 $stmt->bind_param("i", $event_id);
 $stmt->execute();
 $donations = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
-
 
 // Mảng chứa mã ngân hàng VietQR
 $bank_codes = [
@@ -62,7 +79,7 @@ if (!$bank_code) {
 }
 
 // Lấy danh sách bình luận
-$sql_comments = "SELECT c.*, u.name AS user_name FROM comments c 
+$sql_comments = "SELECT c.*, u.full_name AS user_name FROM comments c 
                  JOIN users u ON c.user_id = u.id 
                  WHERE c.event_id = ? 
                  ORDER BY c.created_at DESC";
@@ -79,121 +96,172 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết Sự kiện</title>
-    <link rel="stylesheet" href="ntg_styles.css">
+    <title>Impact VN - <?php echo htmlspecialchars($event["event_name"]); ?></title>
+    <link rel="stylesheet" href="style/donor.css">
 </head>
 <body>
-    <div class="container">
-        <h1><?php echo htmlspecialchars($event["event_name"]); ?></h1>
-        <p><strong>Mô tả:</strong> <?php echo nl2br(htmlspecialchars($event["description"])); ?></p>
-        <p><strong>Tổ chức chịu trách nhiệm:</strong> <?php echo htmlspecialchars($event["organizer"]); ?></p>
-        <p><strong>Tên người phụ trách:</strong> <?php echo htmlspecialchars($event["organizer_name"]); ?></p>
-        <p><strong>Số điện thoại:</strong> <?php echo htmlspecialchars($event["phone"]); ?></p>
-        <p><strong>Địa chỉ người phụ trách:</strong> <?php echo htmlspecialchars($event["address"]); ?></p>
-        <p><strong>Địa chỉ hỗ trợ:</strong> <?php echo htmlspecialchars($event["location"]); ?></p>
-        <p><strong>Mục tiêu quyên góp:</strong> <?php echo number_format($event["goal"])." VND"; ?></p>
-        <p><strong>Số tiền đã quyên góp:</strong> <?php echo number_format($event["total_donated"])." VND"; ?></p>
-        
-        <!-- Nút danh sách quyên góp -->
-        <button onclick="toggleDonations()">Danh sách quyên góp</button>
-        <div id="donationList" style="display: none;">
-            <h3>Danh sách quyên góp</h3>
-            <table border="1">
-                <tr>
-                    <th>Tên</th>
-                    <th>Số tiền</th>
-                    <th>Thời gian</th>
-                </tr>
-                <?php foreach ($donations as $donation): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($donation["donor_name"]); ?></td>
-                        <td><?php echo number_format($donation["amount"])." VND"; ?></td>
-                        <td><?php echo $donation["donated_at"]; ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </table>
-        </div>
-
-        <button class="btn btn-donate" onclick="showModal()">Quyên góp</button>
-        <!-- Card nhập số tiền -->
-        <div id="donationModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal()">&times;</span>
-                <h3>Nhập số tiền muốn quyên góp</h3>
-                <input type="number" id="donationAmount" placeholder="Nhập số tiền (VNĐ)" min="1000">
-                <button class="btn btn-donate" onclick="generateVietQR()">Tạo QR</button>
-                <button class="btn btn-cancel" onclick="closeModal()">Hủy</button>
-                <br>
-                <div class="qr-container">
-                    <img id="qrcode" />
+    <header>
+        <h1><a id="homeLink" href="donor.php">IMPACT VN</a></h1>
+        <div class="header-right">
+            <div id="userMenu">
+                <span id="userName">Xin chào, <?php echo $full_name; ?></span>
+                <span id="arrowDown" class="arrow">▼</span>
+                <div id="dropdown" class="dropdown-content">
+                    <a href="#">Cập nhật thông tin</a>
+                    <a href="#">Thay đổi mật khẩu</a>
+                    <a href="logout.php">Đăng xuất</a>
                 </div>
-                <!-- Moved the confirm button inside the modal -->
-                <button id="confirmBtn" class="btn btn-donate" onclick="confirmDonation()" style="display: none;">Xác nhận</button>
+            </div>
+
+            <div id="authLinks" style="margin-left: auto;">
+                <div class="auth-buttons">
+                </div>
             </div>
         </div>
+    </header>
 
-        <!-- Danh sách bình luận -->
-        <div id="commentSection">
-    <?php if (!empty($comments)): ?>
-        <ul>
-            <?php foreach ($comments as $comment): ?>
-                <li>
-                    <strong><?php echo htmlspecialchars($comment["user_name"]); ?>:</strong> 
-                    <?php echo htmlspecialchars($comment["comment"]); ?>
-                    <br><small><?php echo $comment["created_at"]; ?></small>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php else: ?>
-        <p>Chưa có bình luận nào.</p>
-    <?php endif; ?>
-</div>
+    <main>
+        <div class="container">
+            <h1><?php echo htmlspecialchars($event["event_name"]); ?></h1>
+            <div class="content-wrapper">
+                <!-- Container Left (70%) -->
+                <div class="container-left">
+                    <hr>
+                    <h3>Thông tin chi tiết</h3>
+                    <p><strong>Mô tả:</strong> <?php echo nl2br(htmlspecialchars($event["description"])); ?></p>
+                    <p><strong>Tổ chức:</strong> <?php echo htmlspecialchars($event["organizer"]); ?></p>
+                    <p><strong>Tên người phụ trách:</strong> <?php echo htmlspecialchars($event["organizer_name"]); ?></p>
+                    <p><strong>Số điện thoại:</strong> <?php echo htmlspecialchars($event["phone"]); ?></p>
+                    <p><strong>Địa điểm sự kiện:</strong> <?php echo htmlspecialchars($event["location"]); ?></p>
+                    <p><strong>Mục tiêu quyên góp:</strong> <?php echo number_format($event["goal"])." VND"; ?></p>
+                    <p><strong>Số tiền đã quyên góp:</strong> <?php echo number_format($event["total_donated"])." VND"; ?></p>
 
+                    <hr>
+                    <h3>Bình luận</h3>
+                    <div class="comment-box">
+                        <textarea id="commentText" placeholder="Nhập bình luận của bạn..." rows="2"></textarea>
+                        <button onclick="submitComment()">🗨️</button>
+                    </div>
 
-<div>
-    <textarea id="commentText" placeholder="Nhập bình luận của bạn..." rows="3" style="width: 100%;"></textarea>
-    <button onclick="submitComment()">Gửi bình luận</button>
-</div>
+                    <!-- Danh sách bình luận -->
+                    <div id="commentSection">
+                        <?php if (!empty($comments)): ?>
+                            <ul>
+                                <?php foreach ($comments as $comment): ?>
+                                    <li>
+                                        <strong><?php echo htmlspecialchars($comment["user_name"]); ?>:</strong> 
+                                        <?php echo htmlspecialchars($comment["comment"]); ?>
+                                        <br><small><?php echo $comment["created_at"]; ?></small>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php else: ?>
+                            <p>Chưa có bình luận nào.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
+                <!-- Container Right (30%) -->
+                <div class="container-right">
+                    <!-- Right Top -->
+                     <hr>
+                    <div class="right-top">
+                        <h2><?php echo number_format($event["total_donated"]); ?> VND</h2>
+                        <p>trong tổng số tiền là <?php echo number_format($event["goal"]); ?> VND</p>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: <?php echo ($event["total_donated"] / $event["goal"]) * 100; ?>%;">
+                                <?php echo round(($event["total_donated"] / $event["goal"]) * 100); ?>%
+                            </div>
+                        </div>
+                        <button class="btn btn-donate" onclick="showModal()">Quyên góp</button>
+                        <p><?php echo count($donations); ?> người đã quyên góp</p>
+                    </div>
 
+                    <!-- Right Bottom -->
+                    <div class="right-bottom">
+                        <h3>Danh sách quyên góp</h3>
+                        <table border="1">
+                            <tr>
+                                <th>STT</th>
+                                <th>Họ và Tên</th>
+                                <th>Số tiền</th>
+                                <th>Thời gian</th>
+                            </tr>
+                            <?php $stt = 1; ?>
+                            <?php foreach ($donations as $donation): ?>
+                                <tr>
+                                    <td><?php echo $stt++; ?></td>
+                                    <td><?php echo htmlspecialchars($donation["donor_name"]); ?></td>
+                                    <td><?php echo number_format($donation["amount"])." VND"; ?></td>
+                                    <td><?php echo $donation["donated_at"]; ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Nút quay lại -->
-        <button onclick="window.location.href='ntg_index.php'">Quay lại</button>
-    </div>
+            <!-- Card nhập số tiền -->
+            <div id="donationModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <h3>Nhập số tiền muốn quyên góp</h3>
+                    <input type="number" id="donationAmount" placeholder="Nhập số tiền (VNĐ)" min="1000">
+                    <button class="btn btn-donate" onclick="generateVietQR()">Tạo QR</button>
+                    <br>
+                    <div class="qr-container">
+                        <img id="qrcode" />
+                    </div>
+                    <!-- Moved the confirm button inside the modal -->
+                    <button id="confirmBtn" class="btn btn-donate" onclick="confirmDonation()" style="display: none;">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <h1>IMPACT VN</h1>
+            <ul class="footer-links">
+                <li><a href="#">Điều khoản & Điều kiện</a></li>
+                <li><a href="#">Chính sách bảo mật</a></li>
+                <li><a href="#">Chính sách Cookie</a></li>
+            </ul>
+            <p class="footer-copyright">Copyright © 2025 Community Impact.</p>
+        </div>
+    </footer>
 
     <script>
         function confirmDonation() {
-    let eventId = "<?php echo $event_id; ?>";
+            const eventId = new URLSearchParams(window.location.search).get('id');
+            const amount = document.getElementById('donationAmount').value;
 
-    fetch('update_donation.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `event_id=${eventId}&amount=${amount}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert("Quyên góp thành công! Cảm ơn bạn!");
-            // Hide the confirm button
-            document.getElementById('confirmBtn').style.display = 'none';
-            // Hide the QR code
-            document.getElementById('qrcode').style.display = 'none';
-            // Redirect to index page
-            window.location.href = 'ntg_index.php';
-        } else {
-            alert("Lỗi: " + data.message);
-        }
-    })
-    .catch(error => console.error('Lỗi khi gửi dữ liệu:', error));
-}
-
-        function toggleDonations() {
-            var list = document.getElementById("donationList");
-            if (list.style.display === "none") {
-                list.style.display = "block";
-            } else {
-                list.style.display = "none";
+            if (!amount || amount <= 0) {
+                alert('Vui lòng nhập số tiền hợp lệ.');
+                return;
             }
+
+            fetch('update_donation.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `event_id=${eventId}&amount=${amount}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Quyên góp thành công! Cảm ơn bạn đã đóng góp.');
+                    document.getElementById('confirmBtn').style.display = 'none';
+                    location.reload();
+                } else {
+                    alert(`Lỗi: ${data.message}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi, vui lòng thử lại.');
+            });
         }
 
         document.getElementById("donateBtn").addEventListener("click", function() {
@@ -244,31 +312,29 @@ $conn->close();
         }
 
         function submitComment() {
-    let commentText = document.getElementById("commentText").value.trim();
-    if (commentText === "") {
-        alert("Vui lòng nhập bình luận.");
-        return;
-    }
+            let commentText = document.getElementById("commentText").value.trim();
+            if (commentText === "") {
+                alert("Vui lòng nhập bình luận.");
+                return;
+            }
 
-    let eventId = "<?php echo $event_id; ?>";
+            let eventId = "<?php echo $event_id; ?>";
 
-    fetch('add_comment.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `event_id=${eventId}&comment=${encodeURIComponent(commentText)}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert("Bình luận đã được thêm!");
-            location.reload();
-        } else {
-            alert("Lỗi: " + data.message);
+            fetch('add_comment.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `event_id=${eventId}&comment=${encodeURIComponent(commentText)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert("Lỗi: " + data.message);
+                }
+            })
+            .catch(error => console.error('Lỗi khi gửi bình luận:', error));
         }
-    })
-    .catch(error => console.error('Lỗi khi gửi bình luận:', error));
-}
-
     </script>
 </body>
 </html>

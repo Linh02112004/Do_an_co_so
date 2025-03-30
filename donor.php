@@ -79,7 +79,7 @@ $conn->close();
                 <?php if ($event['status'] === 'ongoing' && $event['amount_raised'] < $event['goal']): ?>
                     <div class="event-card">
                         <h3><?php echo htmlspecialchars($event['name']); ?></h3>
-                        <p><?= nl2br(htmlspecialchars($event['description'])) ?></p>
+                        <div class="event-description"><?= nl2br(htmlspecialchars($event['description'])) ?></div>
                         <p><strong>Tổ chức:</strong> <?php echo htmlspecialchars($event['organization']); ?></p>
                         <p><strong>Người phụ trách:</strong> <?php echo htmlspecialchars($event['organizer_name']); ?></p>
                         <p><strong>Địa điểm hỗ trợ:</strong> <?= htmlspecialchars($event['location']) ?></p>
@@ -88,12 +88,12 @@ $conn->close();
                         $raised = $event['amount_raised'];
                         $progress = ($goal > 0) ? min(100, ($raised / $goal) * 100) : 0;
                         ?>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: <?php echo $progress; ?>%;">
-                                <?php echo number_format($raised, 0, ',', '.'); ?> / <?php echo number_format($goal, 0, ',', '.'); ?> VNĐ
+                        <div class="progress-bar">
+                            <div class="progress" style="width: <?php echo $progress; ?>%;">
+                            <?php echo $progress; ?>%
                             </div>
                         </div>
-                        <button onclick="window.location.href='ntg_event_detail.php?id=<?php echo $event['event_id']; ?>'">Quyên góp</button>
+                        <button onclick="window.location.href='dn_eventDetails.php?id=<?php echo $event['event_id']; ?>'">Quyên góp</button>
                     </div>
                 <?php endif; ?>
             <?php endforeach; ?>
@@ -114,12 +114,12 @@ $conn->close();
                         $raised = $event['amount_raised'];
                         $progress = ($goal > 0) ? min(100, ($raised / $goal) * 100) : 0;
                         ?>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: <?php echo $progress; ?>%;">
-                                <?php echo number_format($raised, 0, ',', '.'); ?> / <?php echo number_format($goal, 0, ',', '.'); ?> VNĐ
+                        <div class="progress-bar">
+                            <div class="progress" style="width: <?php echo $progress; ?>%;">
+                            <?php echo $progress; ?>%
                             </div>
                         </div>
-                        <button onclick="window.location.href='ntg_event_detail.php?id=<?php echo $event['event_id']; ?>'">Quyên góp</button>
+                        <button onclick="window.location.href='dn_eventDetails.php?id=<?php echo $event['event_id']; ?>'">Quyên góp</button>
                     </div>
                 <?php endif; ?>
             <?php endforeach; ?>
@@ -138,5 +138,6 @@ $conn->close();
         </div>
     </footer>
 
+    <script src="script.js" defer></script>
 </body>
 </html>

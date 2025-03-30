@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Thêm quyên góp vào bảng donations
     $sql = "INSERT INTO donations (event_id, donor_id, amount) VALUES (?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("isd", $event_id, $donor_id, $amount);
+    $stmt->bind_param("iss", $event_id, $donor_id, $amount); // `donor_id` là `VARCHAR(10)`, nên dùng `s` thay vì `i`
 
     if ($stmt->execute()) {
         echo json_encode(['success' => true]);

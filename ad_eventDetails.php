@@ -6,8 +6,6 @@ if (!isset($_GET["id"])) {
 }
 
 $event_id = intval($_GET["id"]);
-
-// Truy vấn thông tin sự kiện và tổng tiền quyên góp
 $sql = "SELECT e.*, 
                u.organization_name AS organizer, 
                u.full_name AS organizer_full_name,
@@ -18,7 +16,7 @@ $sql = "SELECT e.*,
         WHERE e.id = ?";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $event_id); 
+$stmt->bind_param("i", $event_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $event = $result->fetch_assoc();
@@ -35,9 +33,8 @@ $sql_donations = "SELECT u.full_name AS donor_name, d.amount, d.donated_at
                   JOIN users u ON d.donor_id = u.id 
                   WHERE d.event_id = ? 
                   ORDER BY d.donated_at DESC";
-
 $stmt = $conn->prepare($sql_donations);
-$stmt->bind_param("i", $event_id); 
+$stmt->bind_param("i", $event_id);
 $stmt->execute();
 $donations = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
@@ -61,31 +58,17 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Impact VN - <?php echo htmlspecialchars($event["event_name"]); ?></title>
-    <link rel="stylesheet" href="style/organization.css">
+    <link rel="stylesheet" href="style/admin.css">
 </head>
 <body>
     <header>
-        <h1><a id="homeLink" href="organization.php">IMPACT VN</a></h1>
+        <h1><a id="homeLink" href="admin.php">IMPACT VN</a></h1>
         <div class="header-right">
             <div id="userMenu">
-                <span id="userName">Xin chào, Tổ chức <?php echo htmlspecialchars($event['organizer']); ?></span>
+                <span id="userName">Xin chào, Quản Trị Viên</span>
                 <span id="arrowDown" class="arrow">▼</span>
                 <div id="dropdown" class="dropdown-content">
-                    <a href="#">Cập nhật thông tin</a>
-                    <a href="#">Thay đổi mật khẩu</a>
                     <a href="logout.php">Đăng xuất</a>
-                </div>
-            </div>
-
-            <div id="authLinks" style="margin-left: auto;">
-                <div class="auth-buttons">
-                    <a id="createEventButton" href="#">Tạo sự kiện</a>
-                    <a id="notifications" href="#">Thông báo</a>
-                    <?php if (!empty($notification)) : ?>
-                        <div class="notification">
-                            <p><?php echo htmlspecialchars($notification['message']); ?></p>
-                        </div>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -93,11 +76,12 @@ $conn->close();
 
     <main>
         <div class="container">
-            <h1><?php echo htmlspecialchars($event["event_name"]); ?></h1>
+        <h1><?php echo htmlspecialchars($event["event_name"]); ?></h1>
             <div class="content-wrapper">
                 <!-- Container Left (70%) -->
                 <div class="container-left">
                     <hr>
+                    <h3>Thông tin chi tiết</h3>
                     <p><strong>Mô tả:</strong> <?php echo nl2br(htmlspecialchars($event["description"])); ?></p>
                     <p><strong>Tổ chức:</strong> <?php echo htmlspecialchars($event["organizer"]); ?></p>
                     <p><strong>Tên người phụ trách:</strong> <?php echo htmlspecialchars($event["organizer_name"]); ?></p>
@@ -105,11 +89,10 @@ $conn->close();
                     <p><strong>Địa điểm sự kiện:</strong> <?php echo htmlspecialchars($event["location"]); ?></p>
                     <p><strong>Mục tiêu quyên góp:</strong> <?php echo number_format($event["goal"])." VND"; ?></p>
                     <p><strong>Số tiền đã quyên góp:</strong> <?php echo number_format($event["total_donated"])." VND"; ?></p>
-
                     <?php if ($event["donation_count"] == 0): ?>
-                        <button onclick="window.location.href='or_deleteEvents.php?id=<?php echo $event_id; ?>'">Xóa sự kiện</button>
+                        <button onclick="window.location.href='ad_deleteEvents.php?id=<?php echo $event_id; ?>'">Xóa sự kiện</button>
                     <?php endif; ?>
-                    <button onclick="openEditModal()">Yêu cầu Sửa Sự kiện</button>
+                    <button onclick="openModal()">So sánh thay đổi</button>
 
                     <hr>
                     <h3>Bình luận</h3>
@@ -138,8 +121,8 @@ $conn->close();
 
                 <!-- Container Right (30%) -->
                 <div class="container-right">
-                    <hr>
                     <!-- Right Top -->
+                     <hr>
                     <div class="right-top">
                         <h2><?php echo number_format($event["total_donated"]); ?> VND</h2>
                         <p>trong tổng số tiền là <?php echo number_format($event["goal"]); ?> VND</p>
@@ -189,49 +172,69 @@ $conn->close();
         </div>
     </footer>
 
-    <!-- Pop-up Yêu cầu chỉnh sửa sự kiện -->
-    <div id="editEventModal" class="modal" style="display: none;">
+    <!-- Pop-up So sánh sự thay đổi của sự kiện yêu cầu chỉnh sửa -->
+    <div id="compareModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('editEventModal')">&times;</span>
-            <h1><small>Yêu cầu sửa sự kiện</small></h1>
-            <form action="or_requestEdit.php" method="POST">
-                <input type="hidden" name="event_id" value="<?php echo htmlspecialchars($event_id); ?>">
-                <label>Tên sự kiện:</label>
-                <input type="text" name="event_name" value="<?php echo htmlspecialchars($event['event_name']); ?>" required>
-                <label>Mô tả:</label>
-                <textarea name="description" required><?php echo htmlspecialchars($event['description']); ?></textarea>
-                <label>Địa chỉ hỗ trợ:</label>
-                <input type="text" name="location" value="<?php echo htmlspecialchars($event['location']); ?>" required>
-                <label>Mục tiêu quyên góp:</label>
-                <input type="number" name="goal" value="<?php echo htmlspecialchars($event['goal']); ?>" required>
-                <label>Tên người phụ trách:</label>
-                <input type="text" name="organizer_name" value="<?php echo htmlspecialchars($event['organizer_name']); ?>" required>
-                <label>Số điện thoại:</label>
-                <input type="text" name="phone" value="<?php echo htmlspecialchars($event['phone']); ?>" required>
-                <button type="submit">Gửi Yêu cầu</button>
+            <span class="close" onclick="closeModal(compareModal)">&times;</span>
+            <h2>So sánh thay đổi</h2>
+            <table border="1">
+                <tr>
+                    <th>Trường</th>
+                    <th>Dữ liệu cũ</th>
+                    <th>Dữ liệu mới</th>
+                </tr>
+                <tr>
+                    <td>Tên sự kiện</td>
+                    <td><?php echo htmlspecialchars($original_event['event_name']); ?></td>
+                    <td><?php echo htmlspecialchars($edited_event['event_name']); ?></td>
+                </tr>
+                <tr>
+                    <td>Mô tả</td>
+                    <td><?php echo nl2br(htmlspecialchars($original_event['description'])); ?></td>
+                    <td><?php echo nl2br(htmlspecialchars($edited_event['description'])); ?></td>
+                </tr>
+                <tr>
+                    <td>Người phụ trách</td>
+                    <td><?php echo htmlspecialchars($original_event['organizer_name']); ?></td>
+                    <td><?php echo htmlspecialchars($edited_event['organizer_name']); ?></td>
+                </tr>
+                <tr>
+                    <td>Mục tiêu</td>
+                    <td><?php echo number_format($original_event['goal']); ?> VND</td>
+                    <td><?php echo number_format($edited_event['goal']); ?> VND</td>
+                </tr>
+            </table>
+
+            <form method="post" action="ad_process_edit.php">
+                <input type="hidden" name="event_id" value="<?php echo $event_id; ?>">
+                <input type="hidden" name="edit_id" value="<?php echo $edited_event['id']; ?>">
+                <button type="submit" name="action" value="approve">Chấp nhận</button>
+                <button type="button" onclick="document.getElementById('reject-reason').style.display='block'">Từ chối</button>
+                <div id="reject-reason" style="display:none;">
+                    <textarea name="reason" placeholder="Nhập lý do từ chối"></textarea>
+                    <button type="submit" name="action" value="reject">Xác nhận từ chối</button>
+                </div>
             </form>
         </div>
     </div>
 
-    <!-- Script điều khiển pop-up -->
     <script>
-    function openEditModal() {
-        document.getElementById('editEventModal').style.display = 'block';
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-    }
-
-    // Đóng pop-up khi click ra ngoài modal
-    window.onclick = function(event) {
-        let modal = document.getElementById('editEventModal');
-        if (event.target == modal) {
-            modal.style.display = 'none';
+        function openEditModal() {
+            document.getElementById('compareModal').style.display = 'block';
         }
-    }
 
-    function submitComment() {
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            let modal = document.getElementById('compareModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function submitComment() {
             let commentText = document.getElementById("commentText").value.trim();
             if (commentText === "") {
                 alert("Vui lòng nhập bình luận.");
