@@ -40,10 +40,16 @@ $donations = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 // Lấy danh sách bình luận
-$sql_comments = "SELECT c.*, u.full_name AS user_name FROM comments c 
-                 JOIN users u ON c.user_id = u.id 
-                 WHERE c.event_id = ? 
-                 ORDER BY c.created_at DESC";
+$sql_comments = "SELECT c.*, 
+                CASE 
+                    WHEN u.role = 'organization' THEN u.organization_name 
+                    ELSE u.full_name 
+                END AS commenter_name 
+                FROM comments c 
+                JOIN users u ON c.user_id = u.id 
+                WHERE c.event_id = ? 
+                ORDER BY c.created_at DESC";
+
 $stmt = $conn->prepare($sql_comments);
 $stmt->bind_param("i", $event_id);
 $stmt->execute();
@@ -107,7 +113,7 @@ $conn->close();
                             <ul>
                                 <?php foreach ($comments as $comment): ?>
                                     <li>
-                                        <strong><?php echo htmlspecialchars($comment["user_name"]); ?>:</strong> 
+                                        <strong><?php echo htmlspecialchars($comment["commenter_name"]); ?>:</strong> 
                                         <?php echo htmlspecialchars($comment["comment"]); ?>
                                         <br><small><?php echo $comment["created_at"]; ?></small>
                                     </li>
