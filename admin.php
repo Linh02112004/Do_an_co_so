@@ -17,7 +17,8 @@ $conn->query("UPDATE events e
 // Truy vấn thông tin sự kiện cùng tổ chức và số tiền đã quyên góp
 $sql = "SELECT e.id AS event_id, e.event_name AS name, e.description, e.status,
                u.organization_name AS organization, e.organizer_name, 
-               e.location, e.goal, COALESCE(SUM(d.amount), 0) AS amount_raised
+               e.location, e.goal, COALESCE(SUM(d.amount), 0) AS amount_raised,
+               (SELECT COUNT(*) FROM event_edits ee WHERE ee.event_id = e.id AND ee.status = 'pending') AS pending
         FROM events e
         LEFT JOIN donations d ON e.id = d.event_id
         JOIN users u ON e.user_id = u.id
@@ -64,10 +65,13 @@ $conn->close();
             <?php foreach ($events as $event): ?>
                 <?php if ($event['status'] === 'ongoing' && $event['amount_raised'] < $event['goal']): ?>
                     <div class="event-card">
-                        <?php if ($event['pending_edits'] > 0): ?>
-                            <span class="warning-icon">❗</span>
-                        <?php endif; ?>
-                        <h3><?php echo htmlspecialchars($event['name']); ?></h3>
+                        <h3>
+                            <?php if ($event['pending'] > 0): ?>
+                                <span class="warning-icon"><big>❗</big></span>
+                            <?php endif; ?>
+
+                            <?php echo htmlspecialchars($event['name']); ?>
+                        </h3>
                         <div class="event-description"><?= nl2br(htmlspecialchars($event['description'])) ?></div>
                         <p><strong>Tổ chức:</strong> <?php echo htmlspecialchars($event['organization']); ?></p>
                         <p><strong>Người phụ trách:</strong> <?php echo htmlspecialchars($event['organizer_name']); ?></p>
