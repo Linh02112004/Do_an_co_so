@@ -2,9 +2,8 @@
 session_start();
 require 'db_connect.php';
 
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header("Location: login.php");
-    exit();
+if (!isset($_SESSION['user_id'])) {
+    die("Lỗi: Bạn chưa đăng nhập.");
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['event_id'], $_POST['action'])) {
@@ -32,11 +31,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['event_id'], $_POST['a
                        location = ?, 
                        goal = ?, 
                        organizer_name = ?, 
-                       phone = ?
+                       phone = ? 
                        WHERE id = ?";
         $stmt_update = $conn->prepare($sql_update);
         $stmt_update->bind_param(
-            "sssissi", 
+            "sssdssi", 
             $edited_event['event_name'], 
             $edited_event['description'], 
             $edited_event['location'], 
@@ -50,11 +49,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['event_id'], $_POST['a
         }
         $stmt_update->close();
 
+        // Lấy tên sự kiện đã được duyệt
+        $event_name = htmlspecialchars($edited_event['event_name']);
+
         // Gửi thông báo cho tổ chức
         $sql_notify = "INSERT INTO notifications (user_id, message) 
-                       VALUES ((SELECT user_id FROM events WHERE id = ?), 'Sự kiện của bạn đã được duyệt và cập nhật thành công.')";
+                       VALUES ((SELECT user_id FROM events WHERE id = ?), ?)";
         $stmt_notify = $conn->prepare($sql_notify);
-        $stmt_notify->bind_param("i", $event_id);
+        $message = "Yêu cầu chỉnh sửa sự kiện $event_name của bạn đã được duyệt và cập nhật thành công.";
+        $stmt_notify->bind_param("is", $event_id, $message);
         $stmt_notify->execute();
         $stmt_notify->close();
 
@@ -63,11 +66,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['event_id'], $_POST['a
             die("Lý do từ chối không được để trống.");
         }
 
+        // Lấy tên sự kiện đã bị từ chối
+        $event_name = htmlspecialchars($edited_event['event_name']);
+
         // Gửi thông báo từ chối cho tổ chức
         $sql_notify = "INSERT INTO notifications (user_id, message) 
                        VALUES ((SELECT user_id FROM events WHERE id = ?), ?)";
         $stmt_notify = $conn->prepare($sql_notify);
-        $message = "Sự kiện của bạn bị từ chối: " . $reason;
+        $message = "Yêu cầu chỉnh sửa sự kiện $event_name của bạn bị từ chối: " . $reason;
         $stmt_notify->bind_param("is", $event_id, $message);
         $stmt_notify->execute();
         $stmt_notify->close();

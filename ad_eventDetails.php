@@ -55,6 +55,27 @@ $stmt->bind_param("i", $event_id);
 $stmt->execute();
 $comments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
+
+// Lấy thông tin sự kiện gốc
+$sql_original = "SELECT event_name, description, location, organizer_name, phone, goal 
+                 FROM events 
+                 WHERE id = ?";
+$stmt = $conn->prepare($sql_original);
+$stmt->bind_param("i", $event_id);
+$stmt->execute();
+$original_event = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+// Lấy phiên bản chỉnh sửa mới nhất đang chờ duyệt
+$sql_edited = "SELECT id, event_name, description, location, organizer_name, phone, goal 
+               FROM event_edits 
+               WHERE event_id = ? AND status = 'pending' 
+               ORDER BY created_at DESC LIMIT 1";
+$stmt = $conn->prepare($sql_edited);
+$stmt->bind_param("i", $event_id);
+$stmt->execute();
+$edited_event = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 $conn->close();
 ?>
 
@@ -63,12 +84,12 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impact VN - <?php echo htmlspecialchars($event["event_name"]); ?></title>
+    <title>🌱 HY VỌNG - <?php echo htmlspecialchars($event["event_name"]); ?></title>
     <link rel="stylesheet" href="style/admin.css">
 </head>
 <body>
     <header>
-        <h1><a id="homeLink" href="admin.php">IMPACT VN</a></h1>
+        <h1><a id="homeLink" href="admin.php">🌱 HY VỌNG</a></h1>
         <div class="header-right">
             <div id="userMenu">
                 <span id="userName">Xin chào, Quản Trị Viên</span>
@@ -168,20 +189,20 @@ $conn->close();
 
     <footer>
         <div class="footer-container">
-            <h1>IMPACT VN</h1>
+            <h1>🌱 HY VỌNG</h1>
             <ul class="footer-links">
                 <li><a href="#">Điều khoản & Điều kiện</a></li>
                 <li><a href="#">Chính sách bảo mật</a></li>
                 <li><a href="#">Chính sách Cookie</a></li>
             </ul>
-            <p class="footer-copyright">Copyright © 2025 Community Impact.</p>
+            <p class="footer-copyright">Copyright © 2025 Hope.</p>
         </div>
     </footer>
 
     <!-- Pop-up So sánh sự thay đổi của sự kiện yêu cầu chỉnh sửa -->
     <div id="compareModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <span class="close" onclick="closeModal(compareModal)">&times;</span>
+            <span class="close" onclick="closeModal('compareModal')">&times;</span>
             <h2>So sánh thay đổi</h2>
             <table border="1">
                 <tr>
@@ -200,32 +221,44 @@ $conn->close();
                     <td><?php echo nl2br(htmlspecialchars($edited_event['description'])); ?></td>
                 </tr>
                 <tr>
-                    <td>Người phụ trách</td>
-                    <td><?php echo htmlspecialchars($original_event['organizer_name']); ?></td>
-                    <td><?php echo htmlspecialchars($edited_event['organizer_name']); ?></td>
+                    <td>Địa điểm hỗ trợ</td>
+                    <td><?php echo nl2br(htmlspecialchars($original_event['location'])); ?></td>
+                    <td><?php echo nl2br(htmlspecialchars($edited_event['location'])); ?></td>
                 </tr>
                 <tr>
                     <td>Mục tiêu</td>
                     <td><?php echo number_format($original_event['goal']); ?> VND</td>
                     <td><?php echo number_format($edited_event['goal']); ?> VND</td>
                 </tr>
+                <tr>
+                    <td>Người phụ trách</td>
+                    <td><?php echo htmlspecialchars($original_event['organizer_name']); ?></td>
+                    <td><?php echo htmlspecialchars($edited_event['organizer_name']); ?></td>
+                </tr>
+                <tr>
+                    <td>Số điện thoại</td>
+                    <td><?php echo htmlspecialchars($original_event['phone']); ?></td>
+                    <td><?php echo htmlspecialchars($edited_event['phone']); ?></td>
+                </tr>
             </table>
 
             <form method="post" action="ad_process_edit.php">
                 <input type="hidden" name="event_id" value="<?php echo $event_id; ?>">
                 <input type="hidden" name="edit_id" value="<?php echo $edited_event['id']; ?>">
-                <button type="submit" name="action" value="approve">Chấp nhận</button>
-                <button type="button" onclick="document.getElementById('reject-reason').style.display='block'">Từ chối</button>
-                <div id="reject-reason" style="display:none;">
-                    <textarea name="reason" placeholder="Nhập lý do từ chối"></textarea>
-                    <button type="submit" name="action" value="reject">Xác nhận từ chối</button>
+                <div class="button-group">
+                    <button type="submit" name="action" value="approve">Chấp nhận</button>
+                    <button type="button" onclick="document.getElementById('reject-reason').style.display='block'">Từ chối</button>
+                </div>
+                <div class="reject-reason" id="reject-reason" style="display:none;">
+                    <textarea id="reason" name="reason" placeholder="Nhập lý do từ chối..." row="2"></textarea>
+                    <button type="submit" name="action" value="reject">📩</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        function openEditModal() {
+        function openModal() {
             document.getElementById('compareModal').style.display = 'block';
         }
 
