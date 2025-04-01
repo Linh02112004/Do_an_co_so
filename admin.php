@@ -131,6 +131,23 @@ $conn->close();
         </div>
     </footer>
 
-    <script src="script.js" defer></script>
+    <script>
+        // Tm kiếm Sự kiện theo tên
+        const searchBox = document.getElementById("searchBox");
+            const eventCards = document.querySelectorAll(".event-card");
+
+            searchBox.addEventListener("input", function () {
+                const searchText = searchBox.value.trim().toLowerCase();
+
+                eventCards.forEach(eventCard => {
+                    const eventName = eventCard.querySelector("h3").textContent.toLowerCase();
+                    if (eventName.includes(searchText)) {
+                        eventCard.style.display = "block";
+                    } else {
+                        eventCard.style.display = "none";
+                    }
+                });
+            });
+    </script>
 </body>
 </html>

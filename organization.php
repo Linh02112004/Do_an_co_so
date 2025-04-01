@@ -9,7 +9,7 @@ require 'db_connect.php';
 $user_id = $_SESSION['user_id'];
 
 // Lấy tên tổ chức của người dùng
-$sql_user = "SELECT organization_name FROM users WHERE id = ?";
+$sql_user = "SELECT * FROM users WHERE id = ?";
 if ($stmt = $conn->prepare($sql_user)) {
     $stmt->bind_param("s", $user_id);
     $stmt->execute();
@@ -37,7 +37,6 @@ $stmt_notification = $conn->prepare($sql_notification);
 $stmt_notification->bind_param("s", $user_id);
 $stmt_notification->execute();
 $result_notification = $stmt_notification->get_result();
-$notifications = $result_notification->fetch_all(MYSQLI_ASSOC);
 $notifications = $result_notification->fetch_all(MYSQLI_ASSOC);
 $stmt_notification->close();
 
@@ -89,20 +88,18 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌱 HY VỌNG - Tổ chức</title>
-    <title>🌱 HY VỌNG - Tổ chức</title>
     <link rel="stylesheet" href="style/organization.css">
 </head>
 <body>
     <header>
-        <h1><a id="homeLink" href="organization.php">🌱 HY VỌNG</a></h1>
         <h1><a id="homeLink" href="organization.php">🌱 HY VỌNG</a></h1>
         <div class="header-right">
             <div id="userMenu">
                 <span id="userName">Xin chào, Tổ chức <?php echo $organization_name; ?></span>
                 <span id="arrowDown" class="arrow">▼</span>
                 <div id="dropdown" class="dropdown-content">
-                    <a href="#">Cập nhật thông tin</a>
-                    <a href="#">Thay đổi mật khẩu</a>
+                    <a id="updateInfoLink" href="#">Cập nhật thông tin</a>
+                    <a id="changePasswordLink" href="#">Thay đổi mật khẩu</a>
                     <a href="logout.php">Đăng xuất</a>
                 </div>
             </div>
@@ -134,32 +131,7 @@ $conn->close();
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                             </ul>
-                    <div id="notifications-container">
-                        <a id="notifications" href="#">Thông báo 
-                            <?php
-                            $unread_count = array_reduce($notifications, function ($count, $notif) {
-                                return $notif['seen'] == 0 ? $count + 1 : $count;
-                            }, 0);
-                            ?>
-                            <span id="notif-badge" <?php if ($unread_count == 0) echo 'style="display:none;"'; ?>>
-                                <?php echo $unread_count; ?>
-                            </span>
-                        </a>
-                        <div id="notificationDropdown" class="notification-dropdown" style="display:none;">
-                            <ul id="notificationList">
-                                <?php if (empty($notifications)) : ?>
-                                    <li><p>Không có thông báo nào.</p></li>
-                                <?php else : ?>
-                                    <?php foreach ($notifications as $notif) : ?>
-                                        <li class="<?php echo $notif['seen'] ? '' : 'unread'; ?>">
-                                            <p><?php echo htmlspecialchars($notif['message']); ?></p>
-                                            <small><?php echo date("d/m/Y H:i", strtotime($notif['created_at'])); ?></small>
-                                        </li>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </ul>
                         </div>
-                    </div>
                     </div>
                 </div>
             </div>
@@ -228,21 +200,81 @@ $conn->close();
     <footer>
         <div class="footer-container">
             <h1>🌱 HY VỌNG</h1>
-            <h1>🌱 HY VỌNG</h1>
             <ul class="footer-links">
                 <li><a href="#">Điều khoản & Điều kiện</a></li>
                 <li><a href="#">Chính sách bảo mật</a></li>
                 <li><a href="#">Chính sách Cookie</a></li>
             </ul>
             <p class="footer-copyright">Copyright © 2025 Hope.</p>
-            <p class="footer-copyright">Copyright © 2025 Hope.</p>
         </div>
     </footer>
+
+    <!-- Pop-up Cập nhật thông tin -->
+    <div id="updateInfoModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('updateInfoModal')">&times;</span>
+            <h1>Cập nhật thông tin Tổ chức</h1>
+            <form action="updateInfor.php" method="POST">
+                <div class="form-container">
+                    <!-- Thông tin Tổ chức -->
+                    <div class="form-section">
+                        <h2>Thông tin Tổ chức</h2>
+                        <input type="hidden" name="role" value="organization">
+
+                        <label for="org_name">Tên tổ chức:</label>
+                        <input type="text" id="org_name" name="org_name" value="<?= htmlspecialchars($user['organization_name']); ?>" required>
+
+                        <label for="org_description">Mô tả về tổ chức:</label>
+                        <textarea id="org_description" name="org_description" required><?= htmlspecialchars($user['description']); ?></textarea>
+
+                        <label for="contact_phone">Số điện thoại liên hệ:</label>
+                        <input type="tel" id="contact_phone" name="contact_phone" value="<?= htmlspecialchars($user['phone']); ?>" required>
+
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" value="<?= htmlspecialchars($user['email']); ?>" required>
+
+                        <label for="address">Địa chỉ:</label>
+                        <input type="text" id="address" name="address" value="<?= htmlspecialchars($user['address']); ?>" required>
+
+                        <label for="website">Website:</label>
+                        <input type="url" id="website" name="website" value="<?= htmlspecialchars($user['website']); ?>">
+
+                        <label for="social_media">Mạng xã hội:</label>
+                        <input type="url" id="social_media" name="social_media" value="<?= htmlspecialchars($user['social_media']); ?>">
+                    </div>
+                </div>
+                <button type="submit">Cập nhật thông tin</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Pop-up Thay đổi mật khẩu -->
+    <div id="changePasswordModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('changePasswordModal')">&times;</span>
+            <h1>Thay đổi mật khẩu</h1>
+            <form action="changePassword.php" method="POST">
+                <div class="form-container">
+                    <!-- Mật khẩu -->
+                    <div class="form-section">
+                        <label for="current_password">Mật khẩu hiện tại:</label>
+                        <input type="password" id="current_password" name="current_password" required>
+
+                        <label for="new_password">Mật khẩu mới:</label>
+                        <input type="password" id="new_password" name="new_password" required>
+
+                        <label for="confirm_password">Xác nhận mật khẩu mới:</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required>
+                    </div>
+                </div>
+                <button type="submit">Thay đổi mật khẩu</button>
+            </form>
+        </div>
+    </div>
 
     <!-- Pop-up Tạo sự kiện -->
     <div id="create_eventModal" class="modal" style="display: none;">
         <div class="modal-content">
-        <span class="close" onclick="closeModal('create_eventModal')">&times;</span>
         <span class="close" onclick="closeModal('create_eventModal')">&times;</span>
             <h1>Tạo sự kiện</h1>
             <form action="or_saveEvents.php" method="POST">
@@ -303,9 +335,47 @@ $conn->close();
     </div>
 
     <script>
-    <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Xử lý modal tạo sự kiện
+            // Modal Cập nhật thông tin
+            const updateInfoModal = document.getElementById("updateInfoModal");
+            const updateInfoLink = document.getElementById("updateInfoLink"); // Liên kết mở modal
+            const closeUpdateInfo = updateInfoModal.querySelector(".close"); // Nút đóng modal
+
+            updateInfoLink.addEventListener("click", function (event) {
+                event.preventDefault();
+                updateInfoModal.style.display = "block"; // Hiển thị modal
+            });
+
+            closeUpdateInfo.addEventListener("click", function () {
+                updateInfoModal.style.display = "none"; // Đóng modal
+            });
+
+            window.addEventListener("click", function (event) {
+                if (event.target === updateInfoModal) {
+                    updateInfoModal.style.display = "none"; // Đóng modal khi click ra ngoài
+                }
+            });
+
+            // Modal Thay đổi mật khẩu
+            const changePasswordModal = document.getElementById("changePasswordModal");
+            const changePasswordLink = document.getElementById("changePasswordLink"); // Liên kết mở modal
+            const closeChangePassword = changePasswordModal.querySelector(".close"); // Nút đóng modal
+
+            changePasswordLink.addEventListener("click", function (event) {
+                event.preventDefault();
+                changePasswordModal.style.display = "block"; // Hiển thị modal
+            });
+
+            closeChangePassword.addEventListener("click", function () {
+                changePasswordModal.style.display = "none"; // Đóng modal
+            });
+
+            window.addEventListener("click", function (event) {
+                if (event.target === changePasswordModal) {
+                    changePasswordModal.style.display = "none"; // Đóng modal khi click ra ngoài
+                }
+            });
+
             // Xử lý modal tạo sự kiện
             const create_eventModal = document.getElementById("create_eventModal");
             const createEventButton = document.getElementById("createEventButton");
@@ -333,7 +403,6 @@ $conn->close();
 
             notificationsBtn.addEventListener("click", function (event) {
                 event.preventDefault();
-                console.log("Notifications button clicked");
 
                 // Thay đổi trạng thái của dropdown
                 if (notificationDropdown.style.display === "none" || notificationDropdown.style.display === "") {
@@ -344,9 +413,6 @@ $conn->close();
 
                 // Gửi yêu cầu AJAX để đánh dấu thông báo là đã đọc
                 if (notifBadge && notifBadge.style.display !== "none") {
-                    console.log("Sending AJAX to mark notifications as seen");
-
-                    // Gửi yêu cầu AJAX tới chính file organization.php
                     fetch("organization.php", {
                         method: "POST",
                         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -370,30 +436,22 @@ $conn->close();
                 }
             });
 
-            const searchBox = document.getElementById('searchBox');
-            const searchButton = document.getElementById('searchButton');
+            // Tm kiếm Sự kiện theo tên
+            const searchBox = document.getElementById("searchBox");
+            const eventCards = document.querySelectorAll(".event-card");
 
-            searchButton.addEventListener('click', filterEvents);
-            searchBox.addEventListener('input', resetSearch); // Tự động hiển thị toàn bộ khi xóa nội dung tìm kiếm
+            searchBox.addEventListener("input", function () {
+                const searchText = searchBox.value.trim().toLowerCase();
 
-            function filterEvents() {
-                const searchValue = searchBox.value.toLowerCase();
-                document.querySelectorAll('.event-card').forEach(card => {
-                    if (card.getAttribute('data-title').includes(searchValue)) {
-                        card.style.display = 'block';
+                eventCards.forEach(eventCard => {
+                    const eventName = eventCard.querySelector("h3").textContent.toLowerCase();
+                    if (eventName.includes(searchText)) {
+                        eventCard.style.display = "block";
                     } else {
-                        card.style.display = 'none';
+                        eventCard.style.display = "none";
                     }
                 });
-            }
-
-            function resetSearch() {
-                if (searchBox.value.trim() === '') {
-                    document.querySelectorAll('.event-card').forEach(card => {
-                        card.style.display = 'block';
-                    });
-                }
-            }
+            });
         });
     </script>
 
