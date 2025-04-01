@@ -26,10 +26,18 @@ $sql_notification = "SELECT id, message, seen, created_at
         ORDER BY seen ASC, created_at DESC 
         LIMIT 5";
 
+// Truy vấn danh sách thông báo chưa đọc trước, sau đó là các thông báo đã đọc (giới hạn 5 thông báo)
+$sql_notification = "SELECT id, message, seen, created_at 
+        FROM notifications 
+        WHERE user_id = ? 
+        ORDER BY seen ASC, created_at DESC 
+        LIMIT 5";
+
 $stmt_notification = $conn->prepare($sql_notification);
 $stmt_notification->bind_param("s", $user_id);
 $stmt_notification->execute();
 $result_notification = $stmt_notification->get_result();
+$notifications = $result_notification->fetch_all(MYSQLI_ASSOC);
 $notifications = $result_notification->fetch_all(MYSQLI_ASSOC);
 $stmt_notification->close();
 
@@ -81,10 +89,12 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌱 HY VỌNG - Tổ chức</title>
+    <title>🌱 HY VỌNG - Tổ chức</title>
     <link rel="stylesheet" href="style/organization.css">
 </head>
 <body>
     <header>
+        <h1><a id="homeLink" href="organization.php">🌱 HY VỌNG</a></h1>
         <h1><a id="homeLink" href="organization.php">🌱 HY VỌNG</a></h1>
         <div class="header-right">
             <div id="userMenu">
@@ -124,7 +134,32 @@ $conn->close();
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                             </ul>
+                    <div id="notifications-container">
+                        <a id="notifications" href="#">Thông báo 
+                            <?php
+                            $unread_count = array_reduce($notifications, function ($count, $notif) {
+                                return $notif['seen'] == 0 ? $count + 1 : $count;
+                            }, 0);
+                            ?>
+                            <span id="notif-badge" <?php if ($unread_count == 0) echo 'style="display:none;"'; ?>>
+                                <?php echo $unread_count; ?>
+                            </span>
+                        </a>
+                        <div id="notificationDropdown" class="notification-dropdown" style="display:none;">
+                            <ul id="notificationList">
+                                <?php if (empty($notifications)) : ?>
+                                    <li><p>Không có thông báo nào.</p></li>
+                                <?php else : ?>
+                                    <?php foreach ($notifications as $notif) : ?>
+                                        <li class="<?php echo $notif['seen'] ? '' : 'unread'; ?>">
+                                            <p><?php echo htmlspecialchars($notif['message']); ?></p>
+                                            <small><?php echo date("d/m/Y H:i", strtotime($notif['created_at'])); ?></small>
+                                        </li>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </ul>
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -193,11 +228,13 @@ $conn->close();
     <footer>
         <div class="footer-container">
             <h1>🌱 HY VỌNG</h1>
+            <h1>🌱 HY VỌNG</h1>
             <ul class="footer-links">
                 <li><a href="#">Điều khoản & Điều kiện</a></li>
                 <li><a href="#">Chính sách bảo mật</a></li>
                 <li><a href="#">Chính sách Cookie</a></li>
             </ul>
+            <p class="footer-copyright">Copyright © 2025 Hope.</p>
             <p class="footer-copyright">Copyright © 2025 Hope.</p>
         </div>
     </footer>
@@ -205,6 +242,7 @@ $conn->close();
     <!-- Pop-up Tạo sự kiện -->
     <div id="create_eventModal" class="modal" style="display: none;">
         <div class="modal-content">
+        <span class="close" onclick="closeModal('create_eventModal')">&times;</span>
         <span class="close" onclick="closeModal('create_eventModal')">&times;</span>
             <h1>Tạo sự kiện</h1>
             <form action="or_saveEvents.php" method="POST">
@@ -265,7 +303,9 @@ $conn->close();
     </div>
 
     <script>
+    <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Xử lý modal tạo sự kiện
             // Xử lý modal tạo sự kiện
             const create_eventModal = document.getElementById("create_eventModal");
             const createEventButton = document.getElementById("createEventButton");
