@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $sql_insert = "INSERT INTO event_edits (event_id, user_id, event_name, description, location, goal, organizer_name, phone) 
                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql_insert);
-        $stmt->bind_param("issssdis", $event_id, $user_id, $event_name, $description, $location, $goal, $organizer_name, $phone);
+        $stmt->bind_param("issssdss", $event_id, $user_id, $event_name, $description, $location, $goal, $organizer_name, $phone);
         
         if ($stmt->execute()) {
             echo "<script>

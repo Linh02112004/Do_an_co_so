@@ -66,12 +66,12 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impact VN - <?php echo htmlspecialchars($event["event_name"]); ?></title>
+    <title>🌱 HY VỌNG - <?php echo htmlspecialchars($event["event_name"]); ?></title>
     <link rel="stylesheet" href="style/organization.css">
 </head>
 <body>
     <header>
-        <h1><a id="homeLink" href="organization.php">IMPACT VN</a></h1>
+        <h1><a id="homeLink" href="organization.php">🌱 HY VỌNG</a></h1>
         <div class="header-right">
             <div id="userMenu">
                 <span id="userName">Xin chào, Tổ chức <?php echo htmlspecialchars($event['organizer']); ?></span>
@@ -185,13 +185,13 @@ $conn->close();
 
     <footer>
         <div class="footer-container">
-            <h1>IMPACT VN</h1>
+            <h1>🌱 HY VỌNG</h1>
             <ul class="footer-links">
                 <li><a href="#">Điều khoản & Điều kiện</a></li>
                 <li><a href="#">Chính sách bảo mật</a></li>
                 <li><a href="#">Chính sách Cookie</a></li>
             </ul>
-            <p class="footer-copyright">Copyright © 2025 Community Impact.</p>
+            <p class="footer-copyright">Copyright © 2025 Hope.</p>
         </div>
     </footer>
 
@@ -214,7 +214,7 @@ $conn->close();
                 <input type="text" name="organizer_name" value="<?php echo htmlspecialchars($event['organizer_name']); ?>" required>
                 <label>Số điện thoại:</label>
                 <input type="text" name="phone" value="<?php echo htmlspecialchars($event['phone']); ?>" required>
-                <button type="submit">Gửi Yêu cầu</button>
+                <button type="submit">Gửi</button>
             </form>
         </div>
     </div>

@@ -19,22 +19,28 @@ if ($stmt = $conn->prepare($sql_user)) {
 }
 $organization_name = $user ? htmlspecialchars($user['organization_name']) : "Tổ chức";
 
-// Lấy thông báo chưa đọc mới nhất
-$sql_notification = "SELECT id, message FROM notifications WHERE user_id = ? AND seen = 0 ORDER BY created_at DESC LIMIT 1";
+// Truy vấn danh sách thông báo chưa đọc trước, sau đó là các thông báo đã đọc (giới hạn 5 thông báo)
+$sql_notification = "SELECT id, message, seen, created_at 
+        FROM notifications 
+        WHERE user_id = ? 
+        ORDER BY seen ASC, created_at DESC 
+        LIMIT 5";
+
 $stmt_notification = $conn->prepare($sql_notification);
 $stmt_notification->bind_param("s", $user_id);
 $stmt_notification->execute();
 $result_notification = $stmt_notification->get_result();
-$notification = $result_notification->fetch_assoc();
+$notifications = $result_notification->fetch_all(MYSQLI_ASSOC);
 $stmt_notification->close();
 
-// Nếu có thông báo, đánh dấu là đã đọc ngay khi hiển thị
-if ($notification) {
-    $sql_mark_seen = "UPDATE notifications SET seen = 1 WHERE id = ?";
-    $stmt_mark_seen = $conn->prepare($sql_mark_seen);
-    $stmt_mark_seen->bind_param("i", $notification['id']);
-    $stmt_mark_seen->execute();
-    $stmt_mark_seen->close();
+// Đánh dấu thông báo là đã đọc khi dropdown được mở
+if (isset($_POST['mark_seen'])) {
+    $sql_update = "UPDATE notifications SET seen = 1 WHERE id = ? AND seen = 0";
+    $stmt_update = $conn->prepare($sql_update);
+    $stmt_update->bind_param("i", $notification['id']);
+    $stmt_update->execute();
+    $stmt_update->close();
+    exit(); // Kết thúc script vì đây là AJAX request
 }
 
 // Cập nhật trạng thái sự kiện khi đủ số tiền
@@ -70,12 +76,12 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impact VN - Tổ chức</title>
+    <title>🌱 HY VỌNG - Tổ chức</title>
     <link rel="stylesheet" href="style/organization.css">
 </head>
 <body>
     <header>
-        <h1><a id="homeLink" href="organization.php">IMPACT VN</a></h1>
+        <h1><a id="homeLink" href="organization.php">🌱 HY VỌNG</a></h1>
         <div class="header-right">
             <div id="userMenu">
                 <span id="userName">Xin chào, Tổ chức <?php echo $organization_name; ?></span>
@@ -90,12 +96,32 @@ $conn->close();
             <div id="authLinks" style="margin-left: auto;">
                 <div class="auth-buttons">
                     <a id="createEventButton" href="#">Tạo sự kiện</a>
-                    <a id="notifications" href="#">Thông báo</a>
-                    <?php if (!empty($notification)) : ?>
-                        <div class="notification">
-                            <p><?php echo htmlspecialchars($notification['message']); ?></p>
+                    <div id="notifications-container">
+                        <a id="notifications" href="#">Thông báo 
+                            <?php
+                            $unread_count = array_reduce($notifications, function ($count, $notif) {
+                                return $notif['seen'] == 0 ? $count + 1 : $count;
+                            }, 0);
+                            ?>
+                            <span id="notif-badge" <?php if ($unread_count == 0) echo 'style="display:none;"'; ?>>
+                                <?php echo $unread_count; ?>
+                            </span>
+                        </a>
+                        <div id="notificationDropdown" class="notification-dropdown" style="display:none;">
+                            <ul id="notificationList">
+                                <?php if (empty($notifications)) : ?>
+                                    <li><p>Không có thông báo nào.</p></li>
+                                <?php else : ?>
+                                    <?php foreach ($notifications as $notif) : ?>
+                                        <li class="<?php echo $notif['seen'] ? '' : 'unread'; ?>">
+                                            <p><?php echo htmlspecialchars($notif['message']); ?></p>
+                                            <small><?php echo date("d/m/Y H:i", strtotime($notif['created_at'])); ?></small>
+                                        </li>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </ul>
                         </div>
-                    <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -162,20 +188,20 @@ $conn->close();
 
     <footer>
         <div class="footer-container">
-            <h1>IMPACT VN</h1>
+            <h1>🌱 HY VỌNG</h1>
             <ul class="footer-links">
                 <li><a href="#">Điều khoản & Điều kiện</a></li>
                 <li><a href="#">Chính sách bảo mật</a></li>
                 <li><a href="#">Chính sách Cookie</a></li>
             </ul>
-            <p class="footer-copyright">Copyright © 2025 Community Impact.</p>
+            <p class="footer-copyright">Copyright © 2025 Hope.</p>
         </div>
     </footer>
 
     <!-- Pop-up Tạo sự kiện -->
     <div id="create_eventModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('loginModal')">&times;</span>
+        <span class="close" onclick="closeModal('create_eventModal')">&times;</span>
             <h1>Tạo sự kiện</h1>
             <form action="or_saveEvents.php" method="POST">
                 <div class="form-container">
@@ -234,8 +260,9 @@ $conn->close();
         </div>
     </div>
 
-    <script src="script.js" defer>
+    <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Xử lý modal tạo sự kiện
             const create_eventModal = document.getElementById("create_eventModal");
             const createEventButton = document.getElementById("createEventButton");
             const closeButton = create_eventModal.querySelector(".close");
@@ -254,6 +281,70 @@ $conn->close();
                     create_eventModal.style.display = "none";
                 }
             });
+
+            // Xử lý thông báo
+            const notificationsBtn = document.getElementById("notifications");
+            const notificationDropdown = document.getElementById("notificationDropdown");
+            const notifBadge = document.getElementById("notif-badge");
+
+            notificationsBtn.addEventListener("click", function (event) {
+                event.preventDefault();
+                console.log("Notifications button clicked");
+
+                // Thay đổi trạng thái của dropdown
+                if (notificationDropdown.style.display === "none" || notificationDropdown.style.display === "") {
+                    notificationDropdown.style.display = "block"; // Hiển thị dropdown
+                } else {
+                    notificationDropdown.style.display = "none"; // Ẩn dropdown
+                }
+
+                // Gửi yêu cầu AJAX để đánh dấu thông báo là đã đọc
+                if (notifBadge && notifBadge.style.display !== "none") {
+                    console.log("Sending AJAX to mark notifications as seen");
+                    fetch("notifications.php", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: "mark_seen=1"
+                    }).then(() => {
+                        notifBadge.style.display = "none";
+                        document.querySelectorAll(".notification-dropdown ul li.unread").forEach(li => {
+                            li.classList.remove("unread");
+                        });
+                    });
+                }
+            });
+
+            // Đóng dropdown khi click ra ngoài
+            document.addEventListener("click", function (event) {
+                if (!notificationsBtn.contains(event.target) && !notificationDropdown.contains(event.target)) {
+                    notificationDropdown.style.display = "none"; // Ẩn dropdown khi click ngoài
+                }
+            });
+
+            const searchBox = document.getElementById('searchBox');
+            const searchButton = document.getElementById('searchButton');
+
+            searchButton.addEventListener('click', filterEvents);
+            searchBox.addEventListener('input', resetSearch); // Tự động hiển thị toàn bộ khi xóa nội dung tìm kiếm
+
+            function filterEvents() {
+                const searchValue = searchBox.value.toLowerCase();
+                document.querySelectorAll('.event-card').forEach(card => {
+                    if (card.getAttribute('data-title').includes(searchValue)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            function resetSearch() {
+                if (searchBox.value.trim() === '') {
+                    document.querySelectorAll('.event-card').forEach(card => {
+                        card.style.display = 'block';
+                    });
+                }
+            }
         });
     </script>
 
